@@ -2,15 +2,6 @@
 //  Board.swift
 //  Chess
 //
-//  Created by Liam Kelly on 3/7/17.
-//  Copyright © 2017 LiamKelly. All rights reserved.
-//
-
-import Foundation
-//
-//  Board.swift
-//  Chess
-//
 //  Created by Liam Kelly on 3/6/17.
 //  Copyright © 2017 LiamKelly. All rights reserved.
 //
@@ -28,6 +19,10 @@ class Board {
     struct Space {
         var position:String = ""
         var piece:Piece
+        
+        mutating func isOccupied() -> Bool {
+            if(piece.type == "") { return false } else { return true }
+        }
     }
     
     var board = Array(repeating: Array(repeating: Space(position: "", piece: Piece()), count: 8), count: 8)
@@ -113,4 +108,104 @@ class Board {
         }
         print()
     }
+    
+    
+    
+    /* returns all possible moves for a specified piece
+     *      ex. a2 pawn (at [7][0]) with a black piece it can capture will return:
+     *          [[6,0],[6,1]]
+     */
+    func movesForPiece(piece:Piece, position:[Int]) -> [[Int]] {
+        
+        let row = position[0]
+        let col = position[1]
+        
+        var allPlayableSpaces:[[Int]]
+        
+        switch piece.type {
+            
+        case "Pawn":
+            // Pawns are the only pieces that both move in only one direction or move differently to capture
+            (piece.color == "black") ? (allPlayableSpaces = [[1 + row,col]]) : (allPlayableSpaces = [[-1 + row,col]])
+            allPlayableSpaces = checkForPawnCapture(position: [row,col], color: piece.color, playableSpaces: allPlayableSpaces)
+            
+        case "Knight":
+            allPlayableSpaces = [
+                    [2 + row,1 + col],[2  + row,-1 + col],
+                    [1 + row,2 + col],[1 + row,-2 + col],
+                    [-2 + row,1 + col],[-2 + row,-1 + col],
+                    [-1 + row,2 + col],[-1 + row,-2 + col]
+                   ]
+            
+        case "Rook":
+            return [[[0][0]]]
+            
+        case "Bishop":
+            return [[[0][0]]]
+            
+        case "King":
+            allPlayableSpaces = [
+                    [-1 + row,-1 + col],[-1 + row,col],[-1 + row,1 + col],
+                    [row,-1 + col],/******************/[row,1 + col],
+                    [1 + row,-1 + col], [1 + row,col], [1 + row,1 + col]
+                   ]
+            
+        case "Queen":
+            return [[[0][0]]]
+        
+        default:
+            return [[[0][0]]]
+        }
+        
+        // deletes all spaces that land outside the board
+        allPlayableSpaces = cleanPlayableSpaces(currentPositions: allPlayableSpaces)
+        
+        return allPlayableSpaces
+    
+    
+    }
+    
+    // Check if the pawn chosen can take an opposing piece
+    func checkForPawnCapture(position:[Int], color:String, playableSpaces:[[Int]]) -> [[Int]] {
+        var newPlayableSpaces = playableSpaces
+        let row = position[0]
+        let col = position[1]
+        
+        if color == "black" {
+            // If there is a white piece at 1,1 or 1,-1 from the pawn, then add to playable spaces
+            if (board[row + 1][col + 1].piece.color == "White") {
+                newPlayableSpaces.append([row+1,col+1])
+            }
+            if (board[row + 1][col - 1].piece.color == "White") {
+                newPlayableSpaces.append([row+1,col-1])
+            }
+            
+        } else {
+            // If there is a black piece at -1,-1 or -1,1 from the pawn, then add to playable spaces
+            if (board[row - 1][col - 1].piece.color == "Black") {
+                newPlayableSpaces.append([row-1,col-1])
+            }
+            if (board[row - 1][col + 1].piece.color == "Black") {
+                newPlayableSpaces.append([row-1,col+1])
+            }
+        }
+        return newPlayableSpaces
+    }
+    
+    // delete all positions that land outside the board
+    func cleanPlayableSpaces(currentPositions:[[Int]]) -> [[Int]] {
+        var newPositions = currentPositions
+        var index = 0
+        for position in newPositions {
+            print(position)
+            if (position[0] > 8 || position[0] < 0 || position[1] > 8 || position[1] < 0) {
+                newPositions.remove(at: index)
+            } else {
+                index+=1
+            }
+        }
+        return newPositions
+    }
+
+    
 }
