@@ -2,6 +2,15 @@
 //  Board.swift
 //  Chess
 //
+//  Created by Liam Kelly on 3/7/17.
+//  Copyright © 2017 LiamKelly. All rights reserved.
+//
+
+import Foundation
+//
+//  Board.swift
+//  Chess
+//
 //  Created by Liam Kelly on 3/6/17.
 //  Copyright © 2017 LiamKelly. All rights reserved.
 //
@@ -13,7 +22,7 @@ class Board {
     struct Piece {
         var type:String = ""
         var color:String = ""
-
+        
     }
     
     struct Space {
