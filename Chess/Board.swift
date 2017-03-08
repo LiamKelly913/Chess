@@ -9,6 +9,8 @@
 import Foundation
 
 class Board {
+    //TODO: Put the 'get possible move' functions into new class
+    //TODO: write one function for 'move in straight line', gets rid of like 200 lines
     
     /* Checking for checkmate could call 'movesForPiece' on all pieces, if King position == any of the returned values, then checkmate
      * This could also be used to prevent a piece from being moved (call it when the piece is selected, pretend it's not there and see if
@@ -44,7 +46,7 @@ class Board {
     
     let columns = ["a","b","c","d","e","f","g","h"]
     
-    let backLine = ["Rook","Knight","Bishop","Queen","King","Bishop","Knight","Rook"]
+    let backLine = ["Rook","Night","Bishop","Queen","King","Bishop","Night","Rook"]
     
     func boardSetup() {
         setupSpaces()
@@ -163,7 +165,7 @@ class Board {
             allPlayableSpaces = checkForPawnCapture(position: [row,col], color: piece.color, playableSpaces: allPlayableSpaces)
             allPlayableSpaces = cleanPlayableSpaces(currentPositions: allPlayableSpaces, color: piece.color)
             
-        case "Knight":
+        case "Night":
             allPlayableSpaces = [
                     [2 + row,1 + col],[2  + row,-1 + col],
                     [1 + row,2 + col],[1 + row,-2 + col],
@@ -287,6 +289,9 @@ class Board {
         var indexToAdd:Int = 1 + position[0]
         
         // Below rook
+        if (indexToAdd > 7) {
+            openLane = false
+        }
         while(openLane) {
             // Adds viable moves below rook until it hits an edge or a piece it can take
             if(board[indexToAdd][position[1]].isOccupied()) {
@@ -309,6 +314,9 @@ class Board {
         // Above rook
         openLane = true
         indexToAdd = position[0] - 1
+        if (indexToAdd < 0) {
+            openLane = false
+        }
         while(openLane) {
             // Adds viable above rook until it hits an edge or a piece it can take
             if(board[indexToAdd][position[1]].isOccupied()) {
@@ -332,6 +340,9 @@ class Board {
         // Right of rook
         openLane = true
         indexToAdd = position[1] + 1
+        if (indexToAdd > 7) {
+            openLane = false
+        }
         while(openLane) {
             // Adds viable above rook until it hits an edge or a piece it can take
             if(board[position[0]][indexToAdd].isOccupied()) {
@@ -354,6 +365,9 @@ class Board {
         // Left of rook
         openLane = true
         indexToAdd = position[1] - 1
+        if (indexToAdd < 0) {
+            openLane = false
+        }
         while(openLane) {
             // Adds viable above rook until it hits an edge or a piece it can take
             if(board[position[0]][indexToAdd].isOccupied()) {
@@ -385,6 +399,9 @@ class Board {
         var columnToAdd:Int = position[1] + 1
         
         // Bottom right of piece
+        if(rowToAdd > 7 || columnToAdd > 7) {
+            openLane = false
+        }
         while(openLane) {
             if(board[rowToAdd][columnToAdd].isOccupied()) {
                 if(board[rowToAdd][columnToAdd].getColor() != color) {
@@ -411,6 +428,9 @@ class Board {
         openLane = true
         rowToAdd = position[0] - 1
         columnToAdd = position[1] + 1
+        if(rowToAdd < 0 || columnToAdd > 7) {
+            openLane = false
+        }
         while(openLane) {
             if(board[rowToAdd][columnToAdd].isOccupied()) {
                 if(board[rowToAdd][columnToAdd].getColor() != color) {
@@ -437,6 +457,9 @@ class Board {
         openLane = true
         rowToAdd = position[0] + 1
         columnToAdd = position[1] - 1
+        if(rowToAdd > 7 || columnToAdd < 0) {
+            openLane = false
+        }
         while(openLane) {
             if(board[rowToAdd][columnToAdd].isOccupied()) {
                 if(board[rowToAdd][columnToAdd].getColor() != color) {
@@ -461,6 +484,9 @@ class Board {
         openLane = true
         rowToAdd = position[0] - 1
         columnToAdd = position[1] - 1
+        if(rowToAdd < 0 || columnToAdd < 0) {
+            openLane = false
+        }
         while(openLane) {
             if(board[rowToAdd][columnToAdd].isOccupied()) {
                 if(board[rowToAdd][columnToAdd].getColor() != color) {
@@ -479,11 +505,6 @@ class Board {
                 }
             }
         }
-        
-        
-        
-        
-        
         return diagonalMoves
     }
     
@@ -496,36 +517,64 @@ class Board {
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    func printBoardWithPossibleMoves(playableSpaces:[[Int]]) {
+        print()
+        var index = 0
+        var found = false
+        var row = 0
+        var col = 0
+        for _ in 1 ... 8 {
+            for _ in 1 ... 8 {
+                // if the current space matches any space in the playable moves array, print an O
+                for space in playableSpaces {
+                    if ([row,col] == space) {
+                        print("O" + " ", terminator: "")
+                        found = true
+                    }
+                    index+=1
+                }
+                index = 0
+                if (board[row][col].piece.type == "" && found == false) {
+                    print("• ", terminator: "")
+                } else if (found == false) {
+                    print(String(board[row][col].piece.type.characters.prefix(1)) + " ", terminator: "")
+                }
+                col += 1
+                found = false
+            }
+            print()
+            col = 0
+            row+=1
+        }
+        print()
+        
+        
+    }
     
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
