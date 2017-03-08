@@ -27,6 +27,14 @@ class Board {
         mutating func isOccupied() -> Bool {
             if(piece.type == "") { return false } else { return true }
         }
+        
+        mutating func getColor() -> String {
+            if self.isOccupied() {
+                return self.piece.color
+            } else {
+                return "Unnocupied"
+            }
+        }
     }
     
     var blackPieceLocations:[[Int]] = [[]]
@@ -146,7 +154,7 @@ class Board {
             
         case "Pawn":
             // Pawns are the only pieces that both move in only one direction or move differently to capture
-            (piece.color == "black") ? (allPlayableSpaces = [[1 + row,col]]) : (allPlayableSpaces = [[-1 + row,col]])
+            (piece.color == "Black") ? (allPlayableSpaces = [[1 + row,col]]) : (allPlayableSpaces = [[-1 + row,col]])
             allPlayableSpaces = checkForPawnCapture(position: [row,col], color: piece.color, playableSpaces: allPlayableSpaces)
             
         case "Knight":
@@ -158,7 +166,7 @@ class Board {
                    ]
             
         case "Rook":
-            return [[0,0]]
+            allPlayableSpaces = rookMoves(position: [row,col], color: piece.color)
             
         case "Bishop":
             return [[0,0]]
@@ -193,7 +201,7 @@ class Board {
         let row = position[0]
         let col = position[1]
         
-        if color == "black" {
+        if color == "Black" {
             // If there is a white piece at 1,1 or 1,-1 from the pawn, then add to playable spaces
             if (board[row + 1][col + 1].piece.color == "White") {
                 newPlayableSpaces.append([row+1,col+1])
@@ -260,6 +268,101 @@ class Board {
             }
         }
         return newPositions
+    }
+    
+    func rookMoves(position:[Int], color:String) -> [[Int]] {
+        var viableMoves:[[Int]] = [[]]
+        var openLane:Bool = true
+        var indexToAdd:Int = 1 + position[0]
+        
+        // Below rook
+        while(openLane) {
+            // Adds viable moves below rook until it hits an edge or a piece it can take
+            if(board[position[indexToAdd]][position[1]].isOccupied()) {
+                if(board[position[indexToAdd]][position[1]].getColor() != color) {
+                    viableMoves.append([indexToAdd,position[1]])
+                    openLane = false
+                } else {
+                    openLane = false
+                }
+            } else {
+                viableMoves.append([indexToAdd, position[1]])
+                if (indexToAdd < 7) {
+                    indexToAdd+=1
+                } else {
+                    openLane = false
+                }
+            }
+        }
+        
+        // Above rook
+        openLane = true
+        indexToAdd = position[0] - 1
+        while(openLane) {
+            // Adds viable above rook until it hits an edge or a piece it can take
+            if(board[position[indexToAdd]][position[1]].isOccupied()) {
+                if(board[position[indexToAdd]][position[1]].getColor() != color) {
+                    viableMoves.append([indexToAdd,position[1]])
+                    openLane = false
+                } else {
+                    openLane = false
+                }
+            } else {
+                viableMoves.append([indexToAdd, position[1]])
+                if (indexToAdd > 0) {
+                    indexToAdd-=1
+                } else {
+                    openLane = false
+                }
+            }
+        }
+        
+        
+        // Right of rook
+        openLane = true
+        indexToAdd = position[1] + 1
+        while(openLane) {
+            // Adds viable above rook until it hits an edge or a piece it can take
+            if(board[position[0]][position[indexToAdd]].isOccupied()) {
+                if(board[position[0]][position[indexToAdd]].getColor() != color) {
+                    viableMoves.append([position[0],indexToAdd])
+                    openLane = false
+                } else {
+                    openLane = false
+                }
+            } else {
+                viableMoves.append([position[0],indexToAdd])
+                if (indexToAdd < 7) {
+                    indexToAdd+=1
+                } else {
+                    openLane = false
+                }
+            }
+        }
+        
+        // Left of rook
+        openLane = true
+        indexToAdd = position[1] - 1
+        while(openLane) {
+            // Adds viable above rook until it hits an edge or a piece it can take
+            if(board[position[0]][position[indexToAdd]].isOccupied()) {
+                if(board[position[0]][position[indexToAdd]].getColor() != color) {
+                    viableMoves.append([position[0],indexToAdd])
+                    openLane = false
+                } else {
+                    openLane = false
+                }
+            } else {
+                viableMoves.append([position[0],indexToAdd])
+                if (indexToAdd > 0) {
+                    indexToAdd-=1
+                } else {
+                    openLane = false
+                }
+            }
+        }
+        
+        return viableMoves
     }
 
     
