@@ -376,6 +376,8 @@ class Board {
         return horizontalVerticle
     }
     
+    // Adds any playable spaces in a diagonal line to an array. Used for 
+    // Bishops and Queens.
     func diagonal(position:[Int], color:String) -> [[Int]] {
         var diagonalMoves:[[Int]] = [[]]
         var openLane:Bool = true
@@ -386,7 +388,7 @@ class Board {
         while(openLane) {
             if(board[rowToAdd][columnToAdd].isOccupied()) {
                 if(board[rowToAdd][columnToAdd].getColor() != color) {
-                    diagonalMoves.append([rowToAdd,columnToAdd])
+                    diagonalMoves.append([rowToAdd, columnToAdd])
                     openLane = false
                 } else {
                     openLane = false
@@ -405,17 +407,125 @@ class Board {
         
         
         
+        // Top right of piece
+        openLane = true
+        rowToAdd = position[0] - 1
+        columnToAdd = position[1] + 1
+        while(openLane) {
+            if(board[rowToAdd][columnToAdd].isOccupied()) {
+                if(board[rowToAdd][columnToAdd].getColor() != color) {
+                    diagonalMoves.append([rowToAdd, columnToAdd])
+                    openLane = false
+                } else {
+                    openLane = false
+                }
+            } else {
+                diagonalMoves.append([rowToAdd,columnToAdd])
+                if (rowToAdd > 0  && columnToAdd < 7) {
+                    rowToAdd-=1
+                    columnToAdd+=1
+                } else {
+                    openLane = false
+                }
+            }
+        }
+        
+        
+        
+        
+        // Bottom left of piece
+        openLane = true
+        rowToAdd = position[0] + 1
+        columnToAdd = position[1] - 1
+        while(openLane) {
+            if(board[rowToAdd][columnToAdd].isOccupied()) {
+                if(board[rowToAdd][columnToAdd].getColor() != color) {
+                    diagonalMoves.append([rowToAdd, columnToAdd])
+                    openLane = false
+                } else {
+                    openLane = false
+                }
+            } else {
+                diagonalMoves.append([rowToAdd,columnToAdd])
+                if (rowToAdd < 7  && columnToAdd > 0) {
+                    rowToAdd+=1
+                    columnToAdd-=1
+                } else {
+                    openLane = false
+                }
+            }
+        }
+        
+        
+        // Top left of piece
+        openLane = true
+        rowToAdd = position[0] - 1
+        columnToAdd = position[1] - 1
+        while(openLane) {
+            if(board[rowToAdd][columnToAdd].isOccupied()) {
+                if(board[rowToAdd][columnToAdd].getColor() != color) {
+                    diagonalMoves.append([rowToAdd, columnToAdd])
+                    openLane = false
+                } else {
+                    openLane = false
+                }
+            } else {
+                diagonalMoves.append([rowToAdd,columnToAdd])
+                if (rowToAdd > 0  && columnToAdd > 0) {
+                    rowToAdd-=1
+                    columnToAdd-=1
+                } else {
+                    openLane = false
+                }
+            }
+        }
+        
+        
         
         
         
         return diagonalMoves
     }
     
+    // Uses horizontal + vertical function to return playable spaces
     func queenMoves(position:[Int], color:String) -> [[Int]] {
-
         let queenMoves = diagonal(position: position, color: color) + horizontalVertical(position: position, color: color)
         return queenMoves
     }
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
 }
