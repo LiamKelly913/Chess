@@ -10,6 +10,10 @@ import Foundation
 
 class Board {
     
+    /* Checking for checkmate could call 'movesForPiece' on all pieces, if King position == any of the returned values, then checkmate
+     * This could also be used to prevent a piece from being moved (call it when the piece is selected, pretend it's not there and see if
+     * there is a checkmate
+     */
     struct Piece {
         var type:String = ""
         var color:String = ""
@@ -24,6 +28,9 @@ class Board {
             if(piece.type == "") { return false } else { return true }
         }
     }
+    
+    var blackPieceLocations:[[Int]] = [[]]
+    var whitePieceLocations:[[Int]] = [[]]
     
     var board = Array(repeating: Array(repeating: Space(position: "", piece: Piece()), count: 8), count: 8)
     
@@ -58,19 +65,26 @@ class Board {
         var backIndex = 7
         for _ in 1...8 {
             board[0][col].piece.type = backLine[col]
+            blackPieceLocations.append([0,col])
             board[0][col].piece.color = "Black"
             board[1][col].piece.type = "Pawn"
+            blackPieceLocations.append([1,col])
             board[1][col].piece.color = "Black"
             
             
             board[7][backIndex].piece.type = backLine[col]
+            whitePieceLocations.append([7,col])
             board[7][backIndex].piece.color = "White"
             board[6][col].piece.type = "Pawn"
+            whitePieceLocations.append([6,col])
             board[6][col].piece.color = "White"
             
             col+=1
             backIndex-=1
         }
+        print(blackPieceLocations)
+        print()
+        print(whitePieceLocations)
     }
     
     func printPositions() {
@@ -109,9 +123,15 @@ class Board {
         print()
     }
     
+    // Update board array for when a piece has been played
+    func playMove() {
+     
+        //TODO: update list of color locations
+    }
     
     
-    /* returns all possible moves for a specified piece
+    /* 
+     * returns all possible moves for a specified piece
      *      ex. a2 pawn (at [7][0]) with a black piece it can capture will return:
      *          [[6,0],[6,1]]
      */
@@ -138,10 +158,10 @@ class Board {
                    ]
             
         case "Rook":
-            return [[[0][0]]]
+            return [[0,0]]
             
         case "Bishop":
-            return [[[0][0]]]
+            return [[0,0]]
             
         case "King":
             allPlayableSpaces = [
@@ -151,15 +171,17 @@ class Board {
                    ]
             
         case "Queen":
-            return [[[0][0]]]
+            return [[0,0]]
         
         default:
-            return [[[0][0]]]
+            return [[0,0]]
         }
         
         // deletes all spaces that land outside the board
-        allPlayableSpaces = cleanPlayableSpaces(currentPositions: allPlayableSpaces)
-        
+        allPlayableSpaces = cleanPlayableSpaces(currentPositions: allPlayableSpaces, color: piece.color)
+        print("these are playable spaces for " + piece.type + " on " + String(describing: position))
+        print(allPlayableSpaces)
+
         return allPlayableSpaces
     
     
@@ -192,16 +214,49 @@ class Board {
         return newPlayableSpaces
     }
     
-    // delete all positions that land outside the board
-    func cleanPlayableSpaces(currentPositions:[[Int]]) -> [[Int]] {
+    // delete all positions that land outside the board or on friendly pieces
+    func cleanPlayableSpaces(currentPositions:[[Int]], color:String) -> [[Int]] {
+        
         var newPositions = currentPositions
         var index = 0
+        var wasRemoved:Bool = false
         for position in newPositions {
-            print(position)
-            if (position[0] > 8 || position[0] < 0 || position[1] > 8 || position[1] < 0) {
+            if (position[0] > 7 || position[0] < 0 || position[1] > 7 || position[1] < 0) {
                 newPositions.remove(at: index)
-            } else {
+            }  else {
                 index+=1
+            }
+        }
+        
+        index = 0
+        if color == "Black" {
+            for position in newPositions {
+                wasRemoved = false
+                for blackLocation in blackPieceLocations {
+                    if position == blackLocation {
+                        newPositions.remove(at: index)
+                        wasRemoved = true
+                    }
+                }
+                if wasRemoved == false {
+                    index+=1
+                }
+            }
+        }
+        
+        index = 0
+        if color == "White" {
+            for position in newPositions {
+                wasRemoved = false
+                for whiteLocation in whitePieceLocations {
+                    if position == whiteLocation {
+                        newPositions.remove(at: index)
+                        wasRemoved = true
+                    }
+                }
+                if wasRemoved == false {
+                    index+=1
+                }
             }
         }
         return newPositions
