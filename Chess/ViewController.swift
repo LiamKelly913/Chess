@@ -25,9 +25,9 @@ class ViewController: UIViewController {
 
         // CHANGE THESE TO TEST DIFFERENT PIECES AND POSSIBLE MOVES
         // Knight must be called 'Night'
-        let type:String = "Night"
-        let color:String = "White"
-        let position:[Int] = [3,6]
+        let type:String = "Queen"
+        let color:String = "Black"
+        let position:[Int] = [3,3]
         
         
         let piece = Board.Piece(type: type, color: color)
