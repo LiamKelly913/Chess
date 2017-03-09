@@ -17,26 +17,20 @@ class ViewController: UIViewController {
     var whiteKingSideCastle:Bool = true
     var whiteQueenSideCastle:Bool = true
 
-    let board:Board = Board()
+    var board:Board = Board()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         board.boardSetup()
-        board.printPositions()
-        board.printBoard()
-        
 
-        
         // CHANGE THESE TO TEST DIFFERENT PIECES AND POSSIBLE MOVES
         // Knight must be called 'Night'
-        let type:String = "Rook"
-        let color:String = "Black"
-        let position:[Int] = [4,6]
+        let type:String = "Night"
+        let color:String = "White"
+        let position:[Int] = [3,6]
         
         
         let piece = Board.Piece(type: type, color: color)
-       // board.printBoardWithPossibleMoves(playableSpaces: board.movesForPiece(piece: piece, position: position))
-        
         
         let moves:Moves = Moves()
         

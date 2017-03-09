@@ -10,7 +10,7 @@ import Foundation
 
 class Moves {
     
-
+    //TODO: write one function for 'move in straight line', gets rid of like 200 lines
     
     func movesForPiece(boardObject:Board, piece:Board.Piece, position:[Int]) -> [[Int]] {
         let whitePieces = boardObject.whitePieceLocations
@@ -47,10 +47,10 @@ class Moves {
             ]
             
         case "Rook":
-            allPlayableSpaces = horizontalVertical(boardObject: boardObject, position: [row,col], color: piece.color)
+            allPlayableSpaces = horizontalMoves(board: boardObject, position: [row,col], color: piece.color)
             
         case "Bishop":
-            allPlayableSpaces = diagonal(boardObject: boardObject, position: [row,col], color: piece.color)
+            allPlayableSpaces = diagonalMoves(board: boardObject, position: [row,col], color: piece.color)
             
         case "King":
             allPlayableSpaces = [
@@ -62,14 +62,14 @@ class Moves {
             
             
         case "Queen":
-            allPlayableSpaces = queenMoves(boardObject: boardObject, position: [row,col], color: piece.color)
+            allPlayableSpaces = queenMoves(board: boardObject, position: [row,col], color: piece.color)
             
         default:
             return [[0,0]]
         }
         
         // Remove positions out of bounds / on top of friendly pieces if the piece has a set number of spots it can move
-        if(piece.type != "Rook" && piece.type != "Night" && piece.type != "Bishop" && piece.type != "Queen") {
+        if(piece.type != "Rook"  && piece.type != "Bishop" && piece.type != "Queen") {
             allPlayableSpaces = cleanPlayableSpaces(blackPieceLocations: blackPieces, whitePieceLocations: whitePieces, currentPositions: allPlayableSpaces, color: piece.color)
         }
         
@@ -111,10 +111,11 @@ class Moves {
     
     // delete all positions that land outside the board or on friendly pieces
     func cleanPlayableSpaces(blackPieceLocations:[[Int]], whitePieceLocations:[[Int]], currentPositions:[[Int]], color:String) -> [[Int]] {
-        
+        print("Cleaning")
         var newPositions = currentPositions
         var index = 0
         var wasRemoved:Bool = false
+        var sameColor:[[Int]]
         for position in newPositions {
             if (position[0] > 7 || position[0] < 0 || position[1] > 7 || position[1] < 0) {
                 newPositions.remove(at: index)
@@ -122,13 +123,17 @@ class Moves {
                 index+=1
             }
         }
-        
+
+        print(whitePieceLocations)
+        print()
+        print()
+        (color == "Black") ? (sameColor = blackPieceLocations) : (sameColor = whitePieceLocations)
         index = 0
-        if color == "Black" {
+
             for position in newPositions {
                 wasRemoved = false
-                for blackLocation in blackPieceLocations {
-                    if position == blackLocation {
+                for location in sameColor {
+                    if position == location {
                         newPositions.remove(at: index)
                         wasRemoved = true
                     }
@@ -137,274 +142,149 @@ class Moves {
                     index+=1
                 }
             }
-        }
-        
-        index = 0
-        if color == "White" {
-            for position in newPositions {
-                wasRemoved = false
-                for whiteLocation in whitePieceLocations {
-                    if position == whiteLocation {
-                        newPositions.remove(at: index)
-                        wasRemoved = true
-                    }
-                }
-                if wasRemoved == false {
-                    index+=1
-                }
-            }
-        }
+
         return newPositions
     }
     
-    func horizontalVertical(boardObject:Board, position:[Int], color:String) -> [[Int]] {
+    // Returns all possible moves in a specified direction from one point
+    func straightLine(boardObject:Board, origin:[Int], direction:String, color:String) -> [[Int]] {
         var board = boardObject.board
-        var horizontalVerticle:[[Int]] = [[]]
+        var rowLimit:Int = 0
+        var columnLimit:Int = 0
         var openLane:Bool = true
-        var indexToAdd:Int = 1 + position[0]
+        var rowToAdd = origin[0]
+        var columnToAdd = origin[1]
+        var columnChange:Int = 0
+        var rowChange:Int = 0
         
-        // Below rook
-        if (indexToAdd > 7) {
-            openLane = false
-        }
-        while(openLane) {
-            // Adds viable moves below rook until it hits an edge or a piece it can take
-            if(board[indexToAdd][position[1]].isOccupied()) {
-                if(board[indexToAdd][position[1]].getColor() != color) {
-                    horizontalVerticle.append([indexToAdd,position[1]])
-                    openLane = false
-                } else {
-                    openLane = false
-                }
-            } else {
-                horizontalVerticle.append([indexToAdd, position[1]])
-                if (indexToAdd < 7) {
-                    indexToAdd+=1
-                } else {
-                    openLane = false
-                }
-            }
-        }
+        var lineArray:[[Int]] = [[]]
         
-        // Above rook
-        openLane = true
-        indexToAdd = position[0] - 1
-        if (indexToAdd < 0) {
-            openLane = false
-        }
-        while(openLane) {
-            // Adds viable above rook until it hits an edge or a piece it can take
-            if(board[indexToAdd][position[1]].isOccupied()) {
-                if(board[indexToAdd][position[1]].getColor() != color) {
-                    horizontalVerticle.append([indexToAdd,position[1]])
-                    openLane = false
-                } else {
-                    openLane = false
-                }
-            } else {
-                horizontalVerticle.append([indexToAdd, position[1]])
-                if (indexToAdd > 0) {
-                    indexToAdd-=1
-                } else {
-                    openLane = false
-                }
-            }
-        }
-        
-        
-        // Right of rook
-        openLane = true
-        indexToAdd = position[1] + 1
-        if (indexToAdd > 7) {
-            openLane = false
-        }
-        while(openLane) {
-            // Adds viable above rook until it hits an edge or a piece it can take
-            if(board[position[0]][indexToAdd].isOccupied()) {
-                if(board[position[0]][indexToAdd].getColor() != color) {
-                    horizontalVerticle.append([position[0],indexToAdd])
-                    openLane = false
-                } else {
-                    openLane = false
-                }
-            } else {
-                horizontalVerticle.append([position[0],indexToAdd])
-                if (indexToAdd < 7) {
-                    indexToAdd+=1
-                } else {
-                    openLane = false
-                }
-            }
-        }
-        
-        // Left of rook
-        openLane = true
-        indexToAdd = position[1] - 1
-        if (indexToAdd < 0) {
-            openLane = false
-        }
-        while(openLane) {
-            // Adds viable above rook until it hits an edge or a piece it can take
-            if(board[position[0]][indexToAdd].isOccupied()) {
-                if(board[position[0]][indexToAdd].getColor() != color) {
-                    horizontalVerticle.append([position[0],indexToAdd])
-                    openLane = false
-                } else {
-                    openLane = false
-                }
-            } else {
-                horizontalVerticle.append([position[0],indexToAdd])
-                if (indexToAdd > 0) {
-                    indexToAdd-=1
-                } else {
-                    openLane = false
-                }
-            }
-        }
-        
-        return horizontalVerticle
-    }
-    
-    // Adds any playable spaces in a diagonal line to an array. Used for
-    // Bishops and Queens.
-    func diagonal(boardObject:Board, position:[Int], color:String) -> [[Int]] {
-        var board = boardObject.board
-        var diagonalMoves:[[Int]] = [[]]
-        var openLane:Bool = true
-        var rowToAdd:Int = position[0] + 1
-        var columnToAdd:Int = position[1] + 1
-        
-        // Bottom right of piece
-        if(rowToAdd > 7 || columnToAdd > 7) {
-            openLane = false
-        }
-        while(openLane) {
-            if(board[rowToAdd][columnToAdd].isOccupied()) {
-                if(board[rowToAdd][columnToAdd].getColor() != color) {
-                    diagonalMoves.append([rowToAdd, columnToAdd])
-                    openLane = false
-                } else {
-                    openLane = false
-                }
-            } else {
-                diagonalMoves.append([rowToAdd,columnToAdd])
-                if (rowToAdd < 7 && columnToAdd < 7) {
-                    rowToAdd+=1
-                    columnToAdd+=1
-                } else {
-                    openLane = false
-                }
+        switch direction {
+        case "Left":
+            rowChange = 0
+            columnChange = -1
+            rowLimit = -1
+            columnLimit = 0
+            
+            if(columnToAdd == 0) {
+                openLane = false
             }
             
-        }
-        
-        
-        
-        // Top right of piece
-        openLane = true
-        rowToAdd = position[0] - 1
-        columnToAdd = position[1] + 1
-        if(rowToAdd < 0 || columnToAdd > 7) {
-            openLane = false
-        }
-        while(openLane) {
-            if(board[rowToAdd][columnToAdd].isOccupied()) {
-                if(board[rowToAdd][columnToAdd].getColor() != color) {
-                    diagonalMoves.append([rowToAdd, columnToAdd])
-                    openLane = false
-                } else {
-                    openLane = false
-                }
-            } else {
-                diagonalMoves.append([rowToAdd,columnToAdd])
-                if (rowToAdd > 0  && columnToAdd < 7) {
-                    rowToAdd-=1
-                    columnToAdd+=1
-                } else {
-                    openLane = false
-                }
+        case "TopLeft":
+            rowChange = -1
+            columnChange = -1
+            rowLimit = 0
+            columnLimit = 0
+            
+            if(rowToAdd == 0 || columnToAdd == 0) {
+                openLane = false
             }
-        }
-        
-        
-        
-        
-        // Bottom left of piece
-        openLane = true
-        rowToAdd = position[0] + 1
-        columnToAdd = position[1] - 1
-        if(rowToAdd > 7 || columnToAdd < 0) {
-            openLane = false
-        }
-        while(openLane) {
-            if(board[rowToAdd][columnToAdd].isOccupied()) {
-                if(board[rowToAdd][columnToAdd].getColor() != color) {
-                    diagonalMoves.append([rowToAdd, columnToAdd])
-                    openLane = false
-                } else {
-                    openLane = false
-                }
-            } else {
-                diagonalMoves.append([rowToAdd,columnToAdd])
-                if (rowToAdd < 7  && columnToAdd > 0) {
-                    rowToAdd+=1
-                    columnToAdd-=1
-                } else {
-                    openLane = false
-                }
+        case "Up":
+            rowChange = -1
+            columnChange = 0
+            rowLimit = 0
+            columnLimit = -1
+            
+            if(rowToAdd == 0) {
+                openLane = false
             }
-        }
-        
-        
-        // Top left of piece
-        openLane = true
-        rowToAdd = position[0] - 1
-        columnToAdd = position[1] - 1
-        if(rowToAdd < 0 || columnToAdd < 0) {
-            openLane = false
-        }
-        while(openLane) {
-            if(board[rowToAdd][columnToAdd].isOccupied()) {
-                if(board[rowToAdd][columnToAdd].getColor() != color) {
-                    diagonalMoves.append([rowToAdd, columnToAdd])
-                    openLane = false
-                } else {
-                    openLane = false
-                }
-            } else {
-                diagonalMoves.append([rowToAdd,columnToAdd])
-                if (rowToAdd > 0  && columnToAdd > 0) {
-                    rowToAdd-=1
-                    columnToAdd-=1
-                } else {
-                    openLane = false
-                }
+        case "TopRight":
+            rowChange = -1
+            columnChange = 1
+            rowLimit = 0
+            columnLimit = 7
+            
+            if(rowToAdd == 0 || columnToAdd == 7) {
+                openLane = false
             }
+        case "Right":
+            rowChange = 0
+            columnChange = 1
+            rowLimit = -1
+            columnLimit = 7
+            
+            if(columnToAdd == 7) {
+                openLane = false
+            }
+        case "BottomRight":
+            rowChange = 1
+            columnChange = 1
+            rowLimit = 7
+            columnLimit = 7
+            
+            if(rowToAdd == 7 || columnToAdd == 7) {
+                openLane = false
+            }
+        case "Down":
+            rowChange = 1
+            columnChange = 0
+            rowLimit = 7
+            columnLimit = -1
+            
+            if(rowToAdd == 7) {
+                openLane = false
+            }
+        case "BottomLeft":
+            rowChange = 1
+            columnChange = -1
+            rowLimit = 7
+            columnLimit = 0
+            
+            if(rowToAdd == 7 || columnToAdd == 0) {
+                openLane = false
+            }
+            
+        default:
+            break
         }
-        return diagonalMoves
-    }
-    
-    // Uses horizontal + vertical function to return playable spaces
-    func queenMoves(boardObject:Board, position:[Int], color:String) -> [[Int]] {
 
-        let queenMoves = diagonal(boardObject: boardObject, position: position, color: color) + horizontalVertical(boardObject: boardObject, position: position, color: color)
-        return queenMoves
-    }
-    
-    
-    // checks if the rook can castle
-    func checkForCastle(position:[Int], color:String) -> [Int] {
-        let row = position[0]
-        let col = position[1]
-        var castleTo:[Int] = []
-        
-        if(color == "Black" && row == 0 && col == 0) {
-            castleTo = [0,4]
-            
+        while(openLane) {
+            rowToAdd+=rowChange
+            columnToAdd+=columnChange
+            print("Looking at " + String(rowToAdd) + "," + String(columnToAdd))
+            if(board[rowToAdd][columnToAdd].isOccupied()) {
+                if(board[rowToAdd][columnToAdd].getColor() != color) {
+                    print("My color is " + color)
+                    print("Piece in front is " + board[rowToAdd][columnToAdd].getColor())
+                    lineArray.append([rowToAdd, columnToAdd])
+                    openLane = false
+                } else {
+                    openLane = false
+                }
+            } else {
+                lineArray.append([rowToAdd,columnToAdd])
+                if (rowToAdd == rowLimit  || columnToAdd == columnLimit) {
+                    openLane = false
+                }
+            }
         }
         
-        
-        return castleTo
+        return lineArray
     }
+    
+    func diagonalMoves(board:Board, position:[Int], color:String) -> [[Int]] {
+        var diagonal = straightLine(boardObject: board, origin: position, direction: "TopLeft", color: color)
+        diagonal+=straightLine(boardObject: board, origin: position, direction: "TopRight", color: color)
+        diagonal+=straightLine(boardObject: board, origin: position, direction: "BottomRight", color: color)
+        diagonal+=straightLine(boardObject: board, origin: position, direction: "BottomLeft", color: color)
+        
+        return diagonal
+    }
+    
+    func horizontalMoves(board:Board, position:[Int], color:String) -> [[Int]] {
+        var horizontal = straightLine(boardObject: board, origin: position, direction: "Left", color: color)
+        horizontal+=straightLine(boardObject: board, origin: position, direction: "Up", color: color)
+        horizontal+=straightLine(boardObject: board, origin: position, direction: "Right", color: color)
+        horizontal+=straightLine(boardObject: board, origin: position, direction: "Down", color: color)
+        
+        return horizontal
+    }
+    
+    func queenMoves(board:Board, position:[Int], color:String) -> [[Int]] {
+        let queenMoves = horizontalMoves(board: board, position: position, color: color) + diagonalMoves(board: board, position: position, color: color)
+        return queenMoves
+        
+    }
+    
     
 }
