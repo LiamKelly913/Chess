@@ -35,9 +35,14 @@ class ViewController: UIViewController {
         
         
         let piece = Board.Piece(type: type, color: color)
-        board.printBoardWithPossibleMoves(playableSpaces: board.movesForPiece(piece: piece, position: position))
+       // board.printBoardWithPossibleMoves(playableSpaces: board.movesForPiece(piece: piece, position: position))
         
         
+        let moves:Moves = Moves()
+        
+        let movesForPiece = moves.movesForPiece(boardObject: board, piece: piece, position: position)
+        
+        board.printBoardWithPossibleMoves(playableSpaces: movesForPiece)
         
         // Do any additional setup after loading the view, typically from a nib.
     }
