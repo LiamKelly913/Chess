@@ -11,6 +11,8 @@ import Foundation
 class Board {
     //TODO: Put the 'get possible move' functions into new class
     //TODO: write one function for 'move in straight line', gets rid of like 200 lines
+    //TODO: create separate class for castle / weird pawn capture thing
+    //TODO: Write update board function after a spot has been chosen. Takes in a location, updates the board's pieces
     
     /* Checking for checkmate could call 'movesForPiece' on all pieces, if King position == any of the returned values, then checkmate
      * This could also be used to prevent a piece from being moved (call it when the piece is selected, pretend it's not there and see if
@@ -41,6 +43,8 @@ class Board {
     
     var blackPieceLocations:[[Int]] = [[]]
     var whitePieceLocations:[[Int]] = [[]]
+    
+    
     
     var board = Array(repeating: Array(repeating: Space(position: "", piece: Piece()), count: 8), count: 8)
     
@@ -92,9 +96,6 @@ class Board {
             col+=1
             backIndex-=1
         }
-        print(blackPieceLocations)
-        print()
-        print(whitePieceLocations)
     }
     
     func printPositions() {
@@ -162,6 +163,12 @@ class Board {
         case "Pawn":
             // Pawns are the only pieces that both move in only one direction or move differently to capture
             (piece.color == "Black") ? (allPlayableSpaces = [[1 + row,col]]) : (allPlayableSpaces = [[-1 + row,col]])
+            // If pawn was on its original row, let it move two spaces forward
+            if(piece.color == "Black" && row == 1) {
+                allPlayableSpaces.append([row+2,col])
+            } else if (piece.color == "White" && row == 6) {
+                allPlayableSpaces.append([row-2,col])
+            }
             allPlayableSpaces = checkForPawnCapture(position: [row,col], color: piece.color, playableSpaces: allPlayableSpaces)
             allPlayableSpaces = cleanPlayableSpaces(currentPositions: allPlayableSpaces, color: piece.color)
             
@@ -200,7 +207,7 @@ class Board {
         
         
       
-        print("these are playable spaces for " + piece.type + " on " + String(describing: position))
+        print("these are playable spaces for a " + piece.color + " " + piece.type + " on " + String(describing: position))
         print(allPlayableSpaces)
 
         return allPlayableSpaces
@@ -513,8 +520,22 @@ class Board {
         let queenMoves = diagonal(position: position, color: color) + horizontalVertical(position: position, color: color)
         return queenMoves
     }
-
     
+    
+    // checks if the rook can castle
+    func checkForCastle(position:[Int], color:String) -> [Int] {
+        let row = position[0]
+        let col = position[1]
+        var castleTo:[Int] = []
+        
+        if(color == "Black" && row == 0 && col == 0) {
+            castleTo = [0,4]
+            
+        }
+        
+        
+        return castleTo
+    }
     
     
     func printBoardWithPossibleMoves(playableSpaces:[[Int]]) {

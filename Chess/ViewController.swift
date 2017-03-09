@@ -9,6 +9,13 @@
 import UIKit
 
 class ViewController: UIViewController {
+    
+    // checks for whether or not you can castle. These are changed after a move is
+    // played that removes castling from your playable list.
+    var blackKingSideCastle:Bool = true
+    var blackQueenSideCastle:Bool = true
+    var whiteKingSideCastle:Bool = true
+    var whiteQueenSideCastle:Bool = true
 
     let board:Board = Board()
     
@@ -22,9 +29,9 @@ class ViewController: UIViewController {
         
         // CHANGE THESE TO TEST DIFFERENT PIECES AND POSSIBLE MOVES
         // Knight must be called 'Night'
-        let type:String = "Queen"
-        let color:String = "White"
-        let position:[Int] = [4,4]
+        let type:String = "Rook"
+        let color:String = "Black"
+        let position:[Int] = [4,6]
         
         
         let piece = Board.Piece(type: type, color: color)
