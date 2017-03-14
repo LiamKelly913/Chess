@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 class Board {
     
@@ -20,12 +21,13 @@ class Board {
     struct Piece {
         var type:String = ""
         var color:String = ""
-        
+        var button:UIButton = UIButton()
     }
     
     struct Space {
         var position:String = ""
         var piece:Piece
+        var location:CGPoint
         
         mutating func isOccupied() -> Bool {
             if(piece.type == "") { return false } else { return true }
@@ -45,8 +47,7 @@ class Board {
     
     
     
-    var board = Array(repeating: Array(repeating: Space(position: "", piece: Piece()), count: 8), count: 8)
-    
+    var board = Array(repeating: Array(repeating: Space(position: "", piece: Piece(), location: CGPoint(x: 0, y: 0)), count: 8), count: 8)
     let columns = ["a","b","c","d","e","f","g","h"]
     
     let backLine = ["Rook","Night","Bishop","Queen","King","Bishop","Night","Rook"]
@@ -97,6 +98,40 @@ class Board {
         }
     }
     
+    
+    // Attaches the coordinates for each space once the dimensions of the board are known
+    func attachSpaceLocations(startingPoint:CGPoint, width:CGFloat) {
+        let oneSpaceLength = width/8
+        var currentPoint = startingPoint
+        var rowIndex = 0
+        var columnIndex = 0
+        for _ in 1...8 {
+            for _ in 1...8 {
+                board[rowIndex][columnIndex].location = CGPoint(x: currentPoint.x, y: currentPoint.y)
+                columnIndex+=1
+                currentPoint.x+=oneSpaceLength
+            }
+            currentPoint.x = startingPoint.x
+            currentPoint.y+=oneSpaceLength
+            columnIndex = 0
+            rowIndex+=1
+        }
+    }
+    
+    
+    func getPieceByLocation(location:CGPoint) -> Piece {
+        var piece:Piece!
+        for spot in board {
+            for space in spot {
+                if space.location == location {
+                    piece = space.piece
+                }
+            }
+        }
+        return piece
+    }
+    
+    
     func printPositions() {
         print()
         var row = 0
@@ -133,6 +168,7 @@ class Board {
         print()
     }
     
+
     // Update board array for when a piece has been played
     func playMove() {
      

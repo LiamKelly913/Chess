@@ -10,7 +10,8 @@ import Foundation
 
 class Moves {
     
-    //TODO: write one function for 'move in straight line', gets rid of like 200 lines
+    //TODO: Castling
+    //TODO: Weird pawn capture thing
     
     func movesForPiece(boardObject:Board, piece:Board.Piece, position:[Int]) -> [[Int]] {
         let whitePieces = boardObject.whitePieceLocations
@@ -241,11 +242,8 @@ class Moves {
         while(openLane) {
             rowToAdd+=rowChange
             columnToAdd+=columnChange
-            print("Looking at " + String(rowToAdd) + "," + String(columnToAdd))
             if(board[rowToAdd][columnToAdd].isOccupied()) {
                 if(board[rowToAdd][columnToAdd].getColor() != color) {
-                    print("My color is " + color)
-                    print("Piece in front is " + board[rowToAdd][columnToAdd].getColor())
                     lineArray.append([rowToAdd, columnToAdd])
                     openLane = false
                 } else {
