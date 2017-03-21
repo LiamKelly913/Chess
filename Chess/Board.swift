@@ -22,18 +22,20 @@ class Board {
         var type:String = ""
         var color:String = ""
         var button:UIButton = UIButton()
+        var currentPos:[Int] = []
     }
     
+    //TODO: Add current space to the piece in question when generating baord
     struct Space {
         var position:String = ""
         var piece:Piece
         var location:CGPoint
         
-        mutating func isOccupied() -> Bool {
+        func isOccupied() -> Bool {
             if(piece.type == "") { return false } else { return true }
         }
         
-        mutating func getColor() -> String {
+        func getColor() -> String {
             if self.isOccupied() {
                 return self.piece.color
             } else {
@@ -80,17 +82,21 @@ class Board {
         for _ in 1...8 {
             board[0][col].piece.type = backLine[col]
             blackPieceLocations.append([0,col])
+            board[0][col].piece.currentPos = [0, col]
             board[0][col].piece.color = "Black"
             board[1][col].piece.type = "Pawn"
             blackPieceLocations.append([1,col])
+            board[0][col].piece.currentPos = [0, col]
             board[1][col].piece.color = "Black"
             
             
             board[7][backIndex].piece.type = backLine[col]
             whitePieceLocations.append([7,col])
+            board[7][backIndex].piece.currentPos = [7, col]
             board[7][backIndex].piece.color = "White"
             board[6][col].piece.type = "Pawn"
             whitePieceLocations.append([6,col])
+            board[6][col].piece.currentPos = [6, col]
             board[6][col].piece.color = "White"
             
             col+=1
@@ -131,6 +137,28 @@ class Board {
         return piece
     }
     
+    
+    
+    
+    func getXYForPos(pos:[Int]) -> CGPoint {
+        var xy:CGPoint?
+        let test = pos
+        var currRow:Int = 0
+        var col:Int = 0
+        for row in board {
+            for space in row {
+                if ([currRow,col] == test) {
+                    xy = space.location
+                    break
+                }
+                col+=1
+            }
+            col = 0
+            currRow+=1
+        }
+        return xy!
+        
+    }
     
     func printPositions() {
         print()

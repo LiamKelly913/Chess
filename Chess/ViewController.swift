@@ -10,11 +10,6 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    struct UISpace {
-        var button:UIButton
-        var location:CGPoint
-        var piece:Board.Piece
-    }
     
     //TODO: Check if piece can be picked up (to prevent a piece pinned on the king from being picked up)
         // Run getMoves for every piece on the board without the piece in question. If King is hit, don't allow interaction 
@@ -32,7 +27,7 @@ class ViewController: UIViewController {
     var board:Board = Board()
     let moves:Moves = Moves()
     
-    var possibleMoveLocations:[UIImageView] = []
+    var possibleMoveLocations:[UIButton] = []
     
     
     @IBOutlet weak var boardView:UIImageView!
@@ -62,10 +57,9 @@ class ViewController: UIViewController {
         board.attachSpaceLocations(startingPoint: boardView.frame.origin, width: sideLength)
         
         
-        //Create array of UIPieces
         
         
-        
+        // add target action to buttons to be tapped
         for row in board.board {
             for space in row {
                 // Add tapped on piece function
@@ -75,14 +69,24 @@ class ViewController: UIViewController {
     }
     
     // TODO: This will crash if assets aren't available
-    func createButton(named:String) -> UIButton {
-        let size = self.view.frame.height/8
-        let square = CGRect(x: 0, y: 0, width: size , height: size)
-        let button = UIButton(frame: square)
+    func createButton(named:String, location:CGPoint) -> UIButton {
+        let side = self.view.frame.height/8
+        let size = CGSize(width: side, height: side)
+        let rect = CGRect(origin: location, size: size)
+        let button = UIButton(frame: rect)
         button.imageView?.image = UIImage(named: named)
         
         
         return button
+    }
+    
+    
+    func getSquareForScreen(pos:[Int]) -> CGRect {
+        let side = self.view.frame.width / 8
+        let size = CGSize(width: side, height: side)
+        let rect = CGRect(origin: board.getXYForPos(pos: pos), size: size)
+        
+        return rect
     }
     
     func tappedOnPiece(sender:UIButton) {
@@ -91,7 +95,7 @@ class ViewController: UIViewController {
         if(alreadyToggled == true) {
             toggleOffOptions()
         }
-       // toggleOptionsForPiece(piece:piece, location:)
+        toggleOptionsForPiece(piece: piece)
         alreadyToggled = true
         
         
@@ -100,19 +104,60 @@ class ViewController: UIViewController {
     
     func toggleOptionsForPiece(piece:Board.Piece) {
         // create squares to highlight, add them to possibleMoveLocation array, make them playable
-        let coordinates = moves.movesForPiece(boardObject: board, piece: piece, position: [])
+        let coordinatesToHighlight = moves.movesForPiece(boardObject: board, piece: piece, position: piece.currentPos)
+        for xy in coordinatesToHighlight {
+            createHighlightForPos(pos: xy)
+            // TODO: change background for this space (add square to highlight)
+        }
     }
     
+    // Removes all highlighted options from superview, deletes the contents of the highlightedmove array
     func toggleOffOptions() {
         for option in possibleMoveLocations {
             option.removeFromSuperview()
         }
+        possibleMoveLocations.removeAll()
     }
     
 
-    func updateBackBoard() {
-
+    //TODO: This own't work if 'Option' asset isn't loaded
+    func createHighlightForPos(pos:[Int]) {
+        let rect = getSquareForScreen(pos: pos)
+        let highlightedButton = UIButton(frame: rect)
+        highlightedButton.imageView?.image = UIImage(named: "Option")
+        possibleMoveLocations.append(highlightedButton)
     }
+    
+    
+    
+    //TODO: write function to attach to highlighted playable spaces
+    func choseHighlightedSpace(sender:UIButton) {
+        
+        // update current baord state, animate piece moving to space
+        
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
