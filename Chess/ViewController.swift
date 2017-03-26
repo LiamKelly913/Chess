@@ -10,16 +10,13 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    struct UISpace {
-        var button:UIButton
-        var location:CGPoint
-        var piece:Board.Piece
-    }
     
     //TODO: Check if piece can be picked up (to prevent a piece pinned on the king from being picked up)
         // Run getMoves for every piece on the board without the piece in question. If King is hit, don't allow interaction 
         // with that piece
-    
+    //TODO: Add a 'lost pieces' view
+    //TODO: Add move history
+    //TODO: Add 'undo'
     
     // checks for whether or not you can castle. These are changed after a move is
     // played that removes castling from your playable list.
@@ -31,11 +28,14 @@ class ViewController: UIViewController {
     var alreadyToggled:Bool = false
     var board:Board = Board()
     let moves:Moves = Moves()
+    var selectedPiece:Board.Piece = Board.Piece()
+    var selectedButton:UIButton = UIButton()
     
-    var possibleMoveLocations:[UIImageView] = []
-    
+    var possibleMoveLocations:[UIButton] = []
+    var piecesOnBoard:[UIButton] = []
     
     @IBOutlet weak var boardView:UIImageView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         board.boardSetup()
@@ -50,76 +50,114 @@ class ViewController: UIViewController {
 
     // create the dimensions and starting point for the board
     func createBoard() {
-        
+
         //Set up dimensions and origin of board
         let sideLength = self.view.frame.width
         let startingPoint = (self.view.frame.height - sideLength)/2
         boardView.frame.size.width = sideLength
         boardView.frame.size.height = sideLength
         boardView.frame.origin = CGPoint(x: 0, y: startingPoint)
-        
+        boardView.image = UIImage(named: "Board")
         //Set up array of space positions for board
         board.attachSpaceLocations(startingPoint: boardView.frame.origin, width: sideLength)
         
-        
-        //Create array of UIPieces
-        
-        
-        
-        for row in board.board {
-            for space in row {
-                // Add tapped on piece function
-                space.piece.button.addTarget(self, action: #selector(tappedOnPiece(sender:)), for: UIControlEvents.touchUpInside)
+        var row = 0
+        var col = 0
+        for Row in board.board {
+            for space in Row {
+                // Add 'tapped on piece' function
+                if(space.isOccupied) {
+                    let button = UIButton()
+                    button.addTarget(self, action: #selector(tappedOnPiece(sender:)), for: UIControlEvents.touchUpInside)
+                    button.frame = getSquareForScreen(pos: [row,col])
+                    let assetName = space.piece.color + space.piece.type
+                    button.setImage(UIImage(named: assetName), for: UIControlState())
+                    piecesOnBoard.append(button)
+                    view.addSubview(button)
+                }
+                col+=1
             }
+            col = 0
+            row+=1
         }
     }
     
-    // TODO: This will crash if assets aren't available
-    func createButton(named:String) -> UIButton {
-        let size = self.view.frame.height/8
-        let square = CGRect(x: 0, y: 0, width: size , height: size)
-        let button = UIButton(frame: square)
-        button.imageView?.image = UIImage(named: named)
-        
-        
-        return button
+    
+    func getSquareForScreen(pos:[Int]) -> CGRect {
+        let side = self.view.frame.width / 8
+        let size = CGSize(width: side, height: side)
+        let rect = CGRect(origin: board.getXYForPos(pos: pos), size: size)
+        return rect
     }
     
     func tappedOnPiece(sender:UIButton) {
         let pieceOrigin = sender.frame.origin
         let piece = board.getPieceByLocation(location: pieceOrigin)
+        selectedPiece = piece
+        selectedButton = sender
+        
         if(alreadyToggled == true) {
             toggleOffOptions()
         }
-       // toggleOptionsForPiece(piece:piece, location:)
+        toggleOptionsForPiece(piece: piece)
         alreadyToggled = true
-        
-        
     }
     
     
     func toggleOptionsForPiece(piece:Board.Piece) {
         // create squares to highlight, add them to possibleMoveLocation array, make them playable
-        let coordinates = moves.movesForPiece(boardObject: board, piece: piece, position: [])
+        let coordinatesToHighlight = moves.movesForPiece(boardObject: board, piece: piece, position: piece.currentPos)
+        for rc in coordinatesToHighlight {
+            createHighlightForPos(pos: rc)
+        }
     }
     
+    // Removes all highlighted options from superview, deletes the contents of the highlightedmove array
     func toggleOffOptions() {
         for option in possibleMoveLocations {
             option.removeFromSuperview()
         }
+        possibleMoveLocations.removeAll()
     }
     
 
-    func updateBackBoard() {
+    // Adds a clickable button to move a piece to
+    func createHighlightForPos(pos:[Int]) {
+        let rect = getSquareForScreen(pos: pos)
+        let highlightedButton = UIButton(frame: rect)
+        highlightedButton.setImage(UIImage(named: "Option"), for: UIControlState())
 
+        highlightedButton.addTarget(self, action: #selector(choseHighlightedSpace(sender:)), for: UIControlEvents.touchUpInside)
+        possibleMoveLocations.append(highlightedButton)
+        view.addSubview(highlightedButton)
     }
     
     
     
-    
-    
-    
+    // attached to the highlighted spaces, updates board state and animates piece moving
+    func choseHighlightedSpace(sender:UIButton) {
+        toggleOffOptions()
+        
+        let endOrigin:CGPoint = sender.frame.origin
+        let endPos:[Int] = board.getRCforXY(location: endOrigin)
+        if board.getPieceByLocation(location: endOrigin).type != "" {
+            for button in piecesOnBoard {
+                if button.frame.origin == endOrigin {
+                    button.removeFromSuperview()
+                }
+            }
+        }
+        // updates board state
+        selectedPiece.button.frame.origin = CGPoint(x: CGFloat(300), y: CGFloat(300))
+        board.movePiece(piece: selectedPiece, to: endPos)
+        board.printBoard()
+        UIView.animate(withDuration: 0.5) { 
+            self.selectedButton.frame.origin = self.board.getXYForPos(pos: endPos)
+        }
+    }
     
 
+
+    
 }
 

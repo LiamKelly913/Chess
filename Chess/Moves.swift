@@ -12,6 +12,7 @@ class Moves {
     
     //TODO: Castling
     //TODO: Weird pawn capture thing
+    //TODO: Prevent moving into checkmate
     
     func movesForPiece(boardObject:Board, piece:Board.Piece, position:[Int]) -> [[Int]] {
         let whitePieces = boardObject.whitePieceLocations
@@ -20,7 +21,7 @@ class Moves {
         let row = position[0]
         let col = position[1]
         
-        var allPlayableSpaces:[[Int]]
+        var allPlayableSpaces:[[Int]] = [[Int]]()
         
         /*
          * Any piece that can move a set amount each turn has the viable moves updated
@@ -33,9 +34,9 @@ class Moves {
             // Pawns are the only pieces that both move in only one direction or move differently to capture
             (piece.color == "Black") ? (allPlayableSpaces = [[1 + row,col]]) : (allPlayableSpaces = [[-1 + row,col]])
             // If pawn was on its original row, let it move two spaces forward
-            if(piece.color == "Black" && row == 1) {
+            if(piece.color == "Black" && row == 1 && boardObject.board[row+1][col].isOccupied == false) {
                 allPlayableSpaces.append([row+2,col])
-            } else if (piece.color == "White" && row == 6) {
+            } else if (piece.color == "White" && row == 6 && boardObject.board[row-1][col].isOccupied == false) {
                 allPlayableSpaces.append([row-2,col])
             }
             allPlayableSpaces = checkForPawnCapture(boardObject: boardObject, position: [row,col], color: piece.color, playableSpaces: allPlayableSpaces)
@@ -74,8 +75,6 @@ class Moves {
             allPlayableSpaces = cleanPlayableSpaces(blackPieceLocations: blackPieces, whitePieceLocations: whitePieces, currentPositions: allPlayableSpaces, color: piece.color)
         }
         
-        print("these are playable spaces for a " + piece.color + " " + piece.type + " on " + String(describing: position))
-        print(allPlayableSpaces)
         
         return allPlayableSpaces
     }
@@ -89,21 +88,21 @@ class Moves {
         
         let board = boardObject.board
         
-        if color == "Black" {
+        if color == "Black" && row != 7 {
             // If there is a white piece at 1,1 or 1,-1 from the pawn, then add to playable spaces
-            if (board[row + 1][col + 1].piece.color == "White") {
+            if(col != 7 && board[row + 1][col + 1].piece.color == "White") {
                 newPlayableSpaces.append([row+1,col+1])
             }
-            if (board[row + 1][col - 1].piece.color == "White") {
+            if (col != 0 && board[row + 1][col - 1].piece.color == "White") {
                 newPlayableSpaces.append([row+1,col-1])
             }
             
-        } else {
+        } else if row != 0 {
             // If there is a black piece at -1,-1 or -1,1 from the pawn, then add to playable spaces
-            if (board[row - 1][col - 1].piece.color == "Black") {
+            if (col != 0 && board[row - 1][col - 1].piece.color == "Black") {
                 newPlayableSpaces.append([row-1,col-1])
             }
-            if (board[row - 1][col + 1].piece.color == "Black") {
+            if (col != 7 && board[row - 1][col + 1].piece.color == "Black") {
                 newPlayableSpaces.append([row-1,col+1])
             }
         }
@@ -112,7 +111,6 @@ class Moves {
     
     // delete all positions that land outside the board or on friendly pieces
     func cleanPlayableSpaces(blackPieceLocations:[[Int]], whitePieceLocations:[[Int]], currentPositions:[[Int]], color:String) -> [[Int]] {
-        print("Cleaning")
         var newPositions = currentPositions
         var index = 0
         var wasRemoved:Bool = false
@@ -125,9 +123,6 @@ class Moves {
             }
         }
 
-        print(whitePieceLocations)
-        print()
-        print()
         (color == "Black") ? (sameColor = blackPieceLocations) : (sameColor = whitePieceLocations)
         index = 0
 
@@ -158,7 +153,7 @@ class Moves {
         var columnChange:Int = 0
         var rowChange:Int = 0
         
-        var lineArray:[[Int]] = [[]]
+        var lineArray:[[Int]] = [[Int]]()
         
         switch direction {
         case "Left":
@@ -242,7 +237,7 @@ class Moves {
         while(openLane) {
             rowToAdd+=rowChange
             columnToAdd+=columnChange
-            if(board[rowToAdd][columnToAdd].isOccupied()) {
+            if(board[rowToAdd][columnToAdd].isOccupied) {
                 if(board[rowToAdd][columnToAdd].getColor() != color) {
                     lineArray.append([rowToAdd, columnToAdd])
                     openLane = false
