@@ -45,7 +45,7 @@ class Board {
     var whitePieceLocations:[[Int]] = [[Int]]()
     var deadWhite:[Piece] = [Piece]()
     var deadBlack:[Piece] = [Piece]()
-    
+
     
     var board = Array(repeating: Array(repeating: Space(position: "", piece: Piece(), location: CGPoint(x: 0, y: 0), isOccupied: false), count: 8), count: 8)
     let columns = ["a","b","c","d","e","f","g","h"]
@@ -282,25 +282,7 @@ class Board {
     }
     
     
-    // Prints the board state w/ a T if the board position is occupied
-    func printOccupiedBoard() {
-        var row = 0
-        var col = 0
-        for _ in 1 ... 8 {
-            for _ in 1 ... 8 {
-                if (board[row][col].isOccupied == false) {
-                    print("• ", terminator: "")
-                } else {
-                    print("T ", terminator: "")
-                }
-                col += 1
-            }
-            print()
-            col = 0
-            row+=1
-        }
-        print()
-    }
+    
 }
 
 

@@ -31,8 +31,13 @@ class ViewController: UIViewController {
     var selectedPiece:Board.Piece = Board.Piece()
     var selectedButton:UIButton = UIButton()
     
-    var possibleMoveLocations:[UIButton] = []
-    var piecesOnBoard:[UIButton] = []
+    var possibleMoveLocations:[UIButton] = [UIButton]()
+    var piecesOnBoard:[UIButton] = [UIButton]()
+    
+    var blackButtons:[UIButton] = [UIButton]()
+    var whiteButtons:[UIButton] = [UIButton]()
+    
+    var blackTurn:Bool = true
     
     @IBOutlet weak var boardView:UIImageView!
     
@@ -72,17 +77,25 @@ class ViewController: UIViewController {
                 // Add 'tapped on piece' function to each button
                 if(space.isOccupied) {
                     let button = UIButton()
+                    let assetName = space.piece.color + space.piece.type
                     button.addTarget(self, action: #selector(tappedOnPiece(sender:)), for: UIControlEvents.touchUpInside)
                     button.frame = getSquareForScreen(pos: [row,col])
-                    let assetName = space.piece.color + space.piece.type
                     button.setImage(UIImage(named: assetName), for: UIControlState())
                     piecesOnBoard.append(button)
+                    if(space.piece.color == "White") {
+                        whiteButtons.append(button)
+                    } else {
+                        blackButtons.append(button)
+                    }
                     view.addSubview(button)
                 }
                 col+=1
             }
             col = 0
             row+=1
+        }
+        for button in blackButtons {
+            button.isUserInteractionEnabled = false
         }
     }
     
@@ -141,7 +154,7 @@ class ViewController: UIViewController {
     // attached to the highlighted spaces, updates board state and animates piece moving
     func choseHighlightedSpace(sender:UIButton) {
         toggleOffOptions()
-        
+        disableButtonsForTurn()
         let endOrigin:CGPoint = sender.frame.origin
         let endPos:[Int] = board.getRCforXY(location: endOrigin)
         if board.getPieceByLocation(location: endOrigin).type != "" {
@@ -158,9 +171,28 @@ class ViewController: UIViewController {
         UIView.animate(withDuration: 0.5) { 
             self.selectedButton.frame.origin = self.board.getXYForPos(pos: endPos)
         }
-        
-        board.printOccupiedBoard()
     }
 
+    // disables interaction with buttons if it's not that color's turn
+    func disableButtonsForTurn() {
+        if blackTurn {
+            for button in blackButtons {
+                button.isUserInteractionEnabled = true
+            }
+            for button in whiteButtons {
+                button.isUserInteractionEnabled = false
+            }
+            blackTurn = false
+        } else {
+            for button in blackButtons {
+                button.isUserInteractionEnabled = false
+            }
+            for button in whiteButtons {
+                button.isUserInteractionEnabled = true
+            }
+            blackTurn = true
+        }
+    }
+    
 }
 
