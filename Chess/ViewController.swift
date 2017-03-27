@@ -51,13 +51,17 @@ class ViewController: UIViewController {
     // create the dimensions and starting point for the board
     func createBoard() {
 
-        //Set up dimensions and origin of board
+        //Set up dimensions and origin of board, add 'remove highlights' if board is tapped
         let sideLength = self.view.frame.width
         let startingPoint = (self.view.frame.height - sideLength)/2
         boardView.frame.size.width = sideLength
         boardView.frame.size.height = sideLength
         boardView.frame.origin = CGPoint(x: 0, y: startingPoint)
         boardView.image = UIImage(named: "Board")
+        boardView.isUserInteractionEnabled = true
+        let tapOnBoard = UITapGestureRecognizer(target: self, action: #selector(toggleOffOptions))
+        boardView.addGestureRecognizer(tapOnBoard)
+        
         //Set up array of space positions for board
         board.attachSpaceLocations(startingPoint: boardView.frame.origin, width: sideLength)
         
@@ -65,7 +69,7 @@ class ViewController: UIViewController {
         var col = 0
         for Row in board.board {
             for space in Row {
-                // Add 'tapped on piece' function
+                // Add 'tapped on piece' function to each button
                 if(space.isOccupied) {
                     let button = UIButton()
                     button.addTarget(self, action: #selector(tappedOnPiece(sender:)), for: UIControlEvents.touchUpInside)
@@ -154,10 +158,9 @@ class ViewController: UIViewController {
         UIView.animate(withDuration: 0.5) { 
             self.selectedButton.frame.origin = self.board.getXYForPos(pos: endPos)
         }
+        
+        board.printOccupiedBoard()
     }
-    
 
-
-    
 }
 

@@ -8,9 +8,14 @@
 
 import Foundation
 
+/*
+ *  Moves takes in a board state, piece, and location and returns all playable positions
+ *  for that piece in that board state
+ */
 class Moves {
     
-    //TODO: Castling
+    //TODO: Prevent pawns from capturing in front of themselves
+    //TODO: Implement Castling
     //TODO: Weird pawn capture thing
     //TODO: Prevent moving into checkmate
     
@@ -31,15 +36,7 @@ class Moves {
         switch piece.type {
             
         case "Pawn":
-            // Pawns are the only pieces that both move in only one direction or move differently to capture
-            (piece.color == "Black") ? (allPlayableSpaces = [[1 + row,col]]) : (allPlayableSpaces = [[-1 + row,col]])
-            // If pawn was on its original row, let it move two spaces forward
-            if(piece.color == "Black" && row == 1 && boardObject.board[row+1][col].isOccupied == false) {
-                allPlayableSpaces.append([row+2,col])
-            } else if (piece.color == "White" && row == 6 && boardObject.board[row-1][col].isOccupied == false) {
-                allPlayableSpaces.append([row-2,col])
-            }
-            allPlayableSpaces = checkForPawnCapture(boardObject: boardObject, position: [row,col], color: piece.color, playableSpaces: allPlayableSpaces)
+            allPlayableSpaces = movesForPawn(boardObject: boardObject, piece: piece, position: position, color: piece.color, white: whitePieces, black:blackPieces)
         case "Night":
             allPlayableSpaces = [
                 [2 + row,1 + col],[2  + row,-1 + col],
@@ -60,9 +57,7 @@ class Moves {
                 [row,-1 + col],/******************/[row,1 + col],
                 [1 + row,-1 + col], [1 + row,col], [1 + row,1 + col]
             ]
-            // deletes all spaces that land outside the board and spaces occupied by friendly pieces
-            
-            
+        
         case "Queen":
             allPlayableSpaces = queenMoves(board: boardObject, position: [row,col], color: piece.color)
             
@@ -79,6 +74,28 @@ class Moves {
         return allPlayableSpaces
     }
     
+    // Returns all playable positions for a pawn
+    func movesForPawn(boardObject:Board, piece:Board.Piece, position:[Int], color:String, white:[[Int]], black:[[Int]]) -> [[Int]] {
+        var allPlayableSpaces = [[Int]]()
+        let row = position[0]
+        let col = position[1]
+        
+        // Pawns are the only pieces that both move in only one direction or move differently to capture
+        if (piece.color == "Black" && !boardObject.board[1 + row][col].isOccupied) {
+            allPlayableSpaces = [[1 + row,col]]
+        } else if (piece.color == "White" && !boardObject.board[-1 + row][col].isOccupied) {
+            allPlayableSpaces = [[-1 + row,col]]
+        }
+    
+        // If pawn was on its original row, let it move two spaces forward
+        if(piece.color == "Black" && row == 1 && boardObject.board[row+1][col].isOccupied == false && boardObject.board[row+2][col].isOccupied == false) {
+            allPlayableSpaces.append([row+2,col])
+        } else if (piece.color == "White" && row == 6 && boardObject.board[row-1][col].isOccupied == false && boardObject.board[row-2][col].isOccupied == false) {
+            allPlayableSpaces.append([row-2,col])
+        }
+        allPlayableSpaces = checkForPawnCapture(boardObject: boardObject, position: [row,col], color: piece.color, playableSpaces: allPlayableSpaces)
+        return allPlayableSpaces
+    }
     
     // Check if the pawn chosen can take an opposing piece
     func checkForPawnCapture(boardObject:Board, position:[Int], color:String, playableSpaces:[[Int]]) -> [[Int]] {
@@ -94,6 +111,7 @@ class Moves {
                 newPlayableSpaces.append([row+1,col+1])
             }
             if (col != 0 && board[row + 1][col - 1].piece.color == "White") {
+                print(board[row+1][col-1].piece)
                 newPlayableSpaces.append([row+1,col-1])
             }
             

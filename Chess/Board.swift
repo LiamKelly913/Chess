@@ -250,7 +250,7 @@ class Board {
         print()
     }
     
-    // Moves a selected piece from its current spot to a new spot
+    // Removes a selected piece from its current spot to a new spot
     func movePiece(piece:Piece, to:[Int]) {
         var newPiece = piece
         var oldPos = piece.currentPos
@@ -270,6 +270,7 @@ class Board {
         board[row][col].piece = newPiece
         board[row][col].isOccupied = true
         board[oldPos[0]][oldPos[1]].isOccupied = false
+        board[oldPos[0]][oldPos[1]].piece.color = ""
         
         if(piece.color == "Black") {
             blackPieceLocations.append(to)
@@ -281,6 +282,25 @@ class Board {
     }
     
     
+    // Prints the board state w/ a T if the board position is occupied
+    func printOccupiedBoard() {
+        var row = 0
+        var col = 0
+        for _ in 1 ... 8 {
+            for _ in 1 ... 8 {
+                if (board[row][col].isOccupied == false) {
+                    print("• ", terminator: "")
+                } else {
+                    print("T ", terminator: "")
+                }
+                col += 1
+            }
+            print()
+            col = 0
+            row+=1
+        }
+        print()
+    }
 }
 
 
