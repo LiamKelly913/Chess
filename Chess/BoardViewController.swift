@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  BoardViewController.swift
 //  Chess
 //
 //  Created by Liam Kelly on 3/6/17.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class BoardViewController: UIViewController {
     
     
     //TODO: Check if piece can be picked up (to prevent a piece pinned on the king from being picked up)
