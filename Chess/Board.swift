@@ -45,7 +45,7 @@ class Board {
     var whitePieceLocations:[[Int]] = [[Int]]()
     var deadWhite:[Piece] = [Piece]()
     var deadBlack:[Piece] = [Piece]()
-    
+
     
     var board = Array(repeating: Array(repeating: Space(position: "", piece: Piece(), location: CGPoint(x: 0, y: 0), isOccupied: false), count: 8), count: 8)
     let columns = ["a","b","c","d","e","f","g","h"]
@@ -250,15 +250,37 @@ class Board {
         print()
     }
     
-    // Moves a selected piece from its current spot to a new spot
+    func printBoardWithColors() {
+        print()
+        var row = 0
+        var col = 0
+        for _ in 1 ... 8 {
+            for _ in 1 ... 8 {
+                if (board[row][col].isOccupied == false) {
+                    print("• ", terminator: "")
+                } else {
+                    print(String(board[row][col].piece.color.characters.prefix(1)) + " ", terminator: "")
+                }
+                col += 1
+            }
+            print()
+            col = 0
+            row+=1
+        }
+        print()
+    }
+    
+    // Removes a selected piece from its current spot to a new spot
     func movePiece(piece:Piece, to:[Int]) {
         var newPiece = piece
         var oldPos = piece.currentPos
         let row = to[0]
         let col = to[1]
+        var didTake = false
         
         // this can only happen if a piece is being taken
         if(board[row][col].isOccupied) {
+            didTake = true
             let pieceToRemove = board[row][col].piece
             if(piece.color == "Black") {
                 deadWhite.append(pieceToRemove)
@@ -270,15 +292,24 @@ class Board {
         board[row][col].piece = newPiece
         board[row][col].isOccupied = true
         board[oldPos[0]][oldPos[1]].isOccupied = false
+        board[oldPos[0]][oldPos[1]].piece.color = ""
         
         if(piece.color == "Black") {
             blackPieceLocations.append(to)
             blackPieceLocations = blackPieceLocations.filter() {$0 != oldPos}
+            if(didTake) {
+                whitePieceLocations = whitePieceLocations.filter() {$0 != to}
+            }
         } else {
             whitePieceLocations.append(to)
             whitePieceLocations = whitePieceLocations.filter() {$0 != oldPos}
+            if(didTake) {
+                blackPieceLocations = blackPieceLocations.filter() {$0 != to}
+
+            }
         }
     }
+    
     
     
 }

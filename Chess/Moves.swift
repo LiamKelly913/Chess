@@ -8,11 +8,14 @@
 
 import Foundation
 
+/*
+ *  Moves takes in a board state, piece, and location and returns all playable positions
+ *  for that piece in that board state
+ */
 class Moves {
     
-    //TODO: Castling
+    //TODO: Implement Castling
     //TODO: Weird pawn capture thing
-    //TODO: Prevent moving into checkmate
     
     func movesForPiece(boardObject:Board, piece:Board.Piece, position:[Int]) -> [[Int]] {
         let whitePieces = boardObject.whitePieceLocations
@@ -31,15 +34,7 @@ class Moves {
         switch piece.type {
             
         case "Pawn":
-            // Pawns are the only pieces that both move in only one direction or move differently to capture
-            (piece.color == "Black") ? (allPlayableSpaces = [[1 + row,col]]) : (allPlayableSpaces = [[-1 + row,col]])
-            // If pawn was on its original row, let it move two spaces forward
-            if(piece.color == "Black" && row == 1 && boardObject.board[row+1][col].isOccupied == false) {
-                allPlayableSpaces.append([row+2,col])
-            } else if (piece.color == "White" && row == 6 && boardObject.board[row-1][col].isOccupied == false) {
-                allPlayableSpaces.append([row-2,col])
-            }
-            allPlayableSpaces = checkForPawnCapture(boardObject: boardObject, position: [row,col], color: piece.color, playableSpaces: allPlayableSpaces)
+            allPlayableSpaces = movesForPawn(boardObject: boardObject, piece: piece, position: position, color: piece.color, white: whitePieces, black:blackPieces)
         case "Night":
             allPlayableSpaces = [
                 [2 + row,1 + col],[2  + row,-1 + col],
@@ -60,9 +55,7 @@ class Moves {
                 [row,-1 + col],/******************/[row,1 + col],
                 [1 + row,-1 + col], [1 + row,col], [1 + row,1 + col]
             ]
-            // deletes all spaces that land outside the board and spaces occupied by friendly pieces
-            
-            
+        
         case "Queen":
             allPlayableSpaces = queenMoves(board: boardObject, position: [row,col], color: piece.color)
             
@@ -75,10 +68,35 @@ class Moves {
             allPlayableSpaces = cleanPlayableSpaces(blackPieceLocations: blackPieces, whitePieceLocations: whitePieces, currentPositions: allPlayableSpaces, color: piece.color)
         }
         
-        
         return allPlayableSpaces
     }
     
+    // Returns all playable positions for a pawn
+    func movesForPawn(boardObject:Board, piece:Board.Piece, position:[Int], color:String, white:[[Int]], black:[[Int]]) -> [[Int]] {
+        var allPlayableSpaces = [[Int]]()
+        let row = position[0]
+        let col = position[1]
+        
+        // Pawns are the only pieces that both move in only one direction or move differently to capture
+        if (piece.color == "Black" && (row + 1 < 7)) {
+            if (!boardObject.board[1 + row][col].isOccupied) {
+                allPlayableSpaces = [[1 + row,col]]
+            }
+        } else if (piece.color == "White" && (row - 1 > 0)) {
+            if (!boardObject.board[-1 + row][col].isOccupied) {
+                allPlayableSpaces = [[-1 + row,col]]
+            }
+        }
+    
+        // If pawn was on its original row, let it move two spaces forward
+        if(piece.color == "Black" && row == 1 && boardObject.board[row+1][col].isOccupied == false && boardObject.board[row+2][col].isOccupied == false) {
+            allPlayableSpaces.append([row+2,col])
+        } else if (piece.color == "White" && row == 6 && boardObject.board[row-1][col].isOccupied == false && boardObject.board[row-2][col].isOccupied == false) {
+            allPlayableSpaces.append([row-2,col])
+        }
+        allPlayableSpaces = checkForPawnCapture(boardObject: boardObject, position: [row,col], color: piece.color, playableSpaces: allPlayableSpaces)
+        return allPlayableSpaces
+    }
     
     // Check if the pawn chosen can take an opposing piece
     func checkForPawnCapture(boardObject:Board, position:[Int], color:String, playableSpaces:[[Int]]) -> [[Int]] {
@@ -96,7 +114,6 @@ class Moves {
             if (col != 0 && board[row + 1][col - 1].piece.color == "White") {
                 newPlayableSpaces.append([row+1,col-1])
             }
-            
         } else if row != 0 {
             // If there is a black piece at -1,-1 or -1,1 from the pawn, then add to playable spaces
             if (col != 0 && board[row - 1][col - 1].piece.color == "Black") {
@@ -109,12 +126,15 @@ class Moves {
         return newPlayableSpaces
     }
     
+    //TODO: Fix bug that messes with potential moves
     // delete all positions that land outside the board or on friendly pieces
     func cleanPlayableSpaces(blackPieceLocations:[[Int]], whitePieceLocations:[[Int]], currentPositions:[[Int]], color:String) -> [[Int]] {
         var newPositions = currentPositions
         var index = 0
         var wasRemoved:Bool = false
         var sameColor:[[Int]]
+        
+        // Removes positions that land outside the board
         for position in newPositions {
             if (position[0] > 7 || position[0] < 0 || position[1] > 7 || position[1] < 0) {
                 newPositions.remove(at: index)
@@ -122,7 +142,7 @@ class Moves {
                 index+=1
             }
         }
-
+        
         (color == "Black") ? (sameColor = blackPieceLocations) : (sameColor = whitePieceLocations)
         index = 0
 
@@ -276,8 +296,56 @@ class Moves {
     func queenMoves(board:Board, position:[Int], color:String) -> [[Int]] {
         let queenMoves = horizontalMoves(board: board, position: position, color: color) + diagonalMoves(board: board, position: position, color: color)
         return queenMoves
-        
     }
     
-    
+    // Create a new board to test against, remove the piece in question and
+    // test all possible moves by opposing color, return false if King is attacked
+    //TODO: Implement function to prevent piece from moving into checkmate
+    func noCheckmate(piece:Board.Piece, board:Board) -> Bool {
+        var noCheckmate:Bool = true
+        let color = piece.color
+        let newBoard = board
+        var kingPosition:[Int] = [Int]()
+        
+        var spacesHit:[[Int]] = [[Int]]()
+        var piecesToCheck:[[Int]] = [[Int]]()
+        var row = 0
+        var col = 0
+        // remove the piece from the board and get the King's position
+        for Row in board.board {
+            for _ in Row {
+                if ((board.board[row][col].piece.type == piece.type) && (board.board[row][col].piece.color == piece.color)) {
+                    newBoard.board[row][col].isOccupied = false
+                    newBoard.board[row][col].piece.color = ""
+                    newBoard.board[row][col].piece.type = ""
+                }
+                if ((board.board[row][col].piece.type == "King") && (board.board[row][col].piece.color == piece.color)) {
+                    kingPosition = board.board[row][col].piece.currentPos
+                }
+                col+=1
+            }
+            col = 0
+            row+=1
+        }
+        row = 0
+        col = 0
+        
+        if color == "Black" {
+            piecesToCheck = newBoard.blackPieceLocations
+        } else {
+            piecesToCheck = newBoard.whitePieceLocations
+        }
+        
+        // get all positions hit from the opposing color
+        for position in piecesToCheck {
+                spacesHit+=movesForPiece(boardObject: newBoard, piece: newBoard.board[position[0]][position[1]].piece, position: position)
+        }
+        
+        for space in spacesHit {
+            if space == kingPosition {
+                noCheckmate = false
+            }
+        }
+        return noCheckmate
+    }
 }

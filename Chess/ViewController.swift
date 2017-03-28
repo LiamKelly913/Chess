@@ -20,10 +20,6 @@ class ViewController: UIViewController {
     
     // checks for whether or not you can castle. These are changed after a move is
     // played that removes castling from your playable list.
-    var blackKingSideCastle:Bool = true
-    var blackQueenSideCastle:Bool = true
-    var whiteKingSideCastle:Bool = true
-    var whiteQueenSideCastle:Bool = true
 
     var alreadyToggled:Bool = false
     var board:Board = Board()
@@ -31,8 +27,13 @@ class ViewController: UIViewController {
     var selectedPiece:Board.Piece = Board.Piece()
     var selectedButton:UIButton = UIButton()
     
-    var possibleMoveLocations:[UIButton] = []
-    var piecesOnBoard:[UIButton] = []
+    var possibleMoveLocations:[UIButton] = [UIButton]()
+    var piecesOnBoard:[UIButton] = [UIButton]()
+    
+    var blackButtons:[UIButton] = [UIButton]()
+    var whiteButtons:[UIButton] = [UIButton]()
+    
+    var blackTurn:Bool = true
     
     @IBOutlet weak var boardView:UIImageView!
     
@@ -47,17 +48,21 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-
+    
     // create the dimensions and starting point for the board
     func createBoard() {
 
-        //Set up dimensions and origin of board
+        //Set up dimensions and origin of board, add 'remove highlights' if board is tapped
         let sideLength = self.view.frame.width
         let startingPoint = (self.view.frame.height - sideLength)/2
         boardView.frame.size.width = sideLength
         boardView.frame.size.height = sideLength
         boardView.frame.origin = CGPoint(x: 0, y: startingPoint)
         boardView.image = UIImage(named: "Board")
+        boardView.isUserInteractionEnabled = true
+        let tapOnBoard = UITapGestureRecognizer(target: self, action: #selector(toggleOffOptions))
+        boardView.addGestureRecognizer(tapOnBoard)
+        
         //Set up array of space positions for board
         board.attachSpaceLocations(startingPoint: boardView.frame.origin, width: sideLength)
         
@@ -65,14 +70,19 @@ class ViewController: UIViewController {
         var col = 0
         for Row in board.board {
             for space in Row {
-                // Add 'tapped on piece' function
+                // Add 'tapped on piece' function to each button
                 if(space.isOccupied) {
                     let button = UIButton()
+                    let assetName = space.piece.color + space.piece.type
                     button.addTarget(self, action: #selector(tappedOnPiece(sender:)), for: UIControlEvents.touchUpInside)
                     button.frame = getSquareForScreen(pos: [row,col])
-                    let assetName = space.piece.color + space.piece.type
                     button.setImage(UIImage(named: assetName), for: UIControlState())
                     piecesOnBoard.append(button)
+                    if(space.piece.color == "White") {
+                        whiteButtons.append(button)
+                    } else {
+                        blackButtons.append(button)
+                    }
                     view.addSubview(button)
                 }
                 col+=1
@@ -80,6 +90,9 @@ class ViewController: UIViewController {
             col = 0
             row+=1
         }
+        
+        // turn off black buttons for first move of the game
+        disableBlackButtons()
     }
     
     
@@ -137,9 +150,11 @@ class ViewController: UIViewController {
     // attached to the highlighted spaces, updates board state and animates piece moving
     func choseHighlightedSpace(sender:UIButton) {
         toggleOffOptions()
-        
+        disableButtonsForTurn()
         let endOrigin:CGPoint = sender.frame.origin
         let endPos:[Int] = board.getRCforXY(location: endOrigin)
+        let pieceTaken = board.getPieceByLocation(location: endOrigin)
+
         if board.getPieceByLocation(location: endOrigin).type != "" {
             for button in piecesOnBoard {
                 if button.frame.origin == endOrigin {
@@ -150,14 +165,65 @@ class ViewController: UIViewController {
         // updates board state
         selectedPiece.button.frame.origin = CGPoint(x: CGFloat(300), y: CGFloat(300))
         board.movePiece(piece: selectedPiece, to: endPos)
+        print("===================")
         board.printBoard()
+        board.printBoardWithColors()
+        print("===================")
         UIView.animate(withDuration: 0.5) { 
             self.selectedButton.frame.origin = self.board.getXYForPos(pos: endPos)
         }
+        
+        if(pieceTaken.type == "King") {
+            endGame(color:pieceTaken.color)
+        }
+    }
+
+    // disables interaction with buttons if it's not that color's turn
+    func disableButtonsForTurn() {
+        if blackTurn {
+            enableBlackButtons()
+            disableWhiteButtons()
+            blackTurn = false
+        } else {
+            disableBlackButtons()
+            enableWhiteButtons()
+            blackTurn = true
+        }
     }
     
-
-
+    func endGame(color:String) {
+        disableBlackButtons()
+        disableWhiteButtons()
+        if(color == "Black") {
+            //white wins
+        } else {
+            //black wins
+        }
+    }
+    
+    func disableBlackButtons() {
+        for button in blackButtons {
+            button.isUserInteractionEnabled = false
+        }
+    }
+    
+    func disableWhiteButtons() {
+        for button in whiteButtons {
+            button.isUserInteractionEnabled = false
+        }
+    }
+    
+    func enableBlackButtons() {
+        for button in blackButtons {
+            button.isUserInteractionEnabled = true
+        }
+    }
+    
+    func enableWhiteButtons() {
+        for button in whiteButtons {
+            button.isUserInteractionEnabled = true
+        }
+    }
     
 }
 
