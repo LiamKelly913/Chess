@@ -11,13 +11,6 @@ import UIKit
 
 class Board {
     
-    //TODO: Write update board function after a spot has been chosen. Takes in a location, updates the board's pieces
-    
-    /* Checking for checkmate could call 'movesForPiece' on all pieces, if King position == any of the returned values, then checkmate
-     * This could also be used to prevent a piece from being moved (call it when the piece is selected, pretend it's not there and see if
-     * there is a checkmate
-     */
-    
     struct Piece {
         var type:String = String()
         var color:String = String()
@@ -25,7 +18,6 @@ class Board {
         var currentPos:[Int] = [Int]()
     }
     
-    //TODO: Add current space to the piece in question when generating baord
     struct Space {
         var position:String = String()
         var piece:Piece
@@ -46,6 +38,8 @@ class Board {
     var deadWhite:[Piece] = [Piece]()
     var deadBlack:[Piece] = [Piece]()
 
+    
+    //MARK: Setup
     
     var board = Array(repeating: Array(repeating: Space(position: "", piece: Piece(), location: CGPoint(x: 0, y: 0), isOccupied: false), count: 8), count: 8)
     let columns = ["a","b","c","d","e","f","g","h"]
@@ -127,7 +121,7 @@ class Board {
         }
     }
     
-    
+    //MARK: Position functions
     func getPieceByLocation(location:CGPoint) -> Piece {
         var piece:Piece!
         for spot in board {
@@ -181,6 +175,53 @@ class Board {
         }
     }
     
+    
+    
+    // Removes a selected piece from its current spot to a new spot
+    func movePiece(piece:Piece, to:[Int]) {
+        var newPiece = piece
+        var oldPos = piece.currentPos
+        let row = to[0]
+        let col = to[1]
+        var didTake = false
+        
+        // this can only happen if a piece is being taken
+        if(board[row][col].isOccupied) {
+            didTake = true
+            let pieceToRemove = board[row][col].piece
+            if(piece.color == "Black") {
+                deadWhite.append(pieceToRemove)
+            } else {
+                deadBlack.append(pieceToRemove)
+            }
+        }
+        
+        newPiece.currentPos = to
+        board[row][col].piece = newPiece
+        board[row][col].isOccupied = true
+        board[oldPos[0]][oldPos[1]].isOccupied = false
+        board[oldPos[0]][oldPos[1]].piece.color = ""
+        
+        if(piece.color == "Black") {
+            blackPieceLocations.append(to)
+            blackPieceLocations = blackPieceLocations.filter() {$0 != oldPos}
+            if(didTake) {
+                whitePieceLocations = whitePieceLocations.filter() {$0 != to}
+            }
+        } else {
+            whitePieceLocations.append(to)
+            whitePieceLocations = whitePieceLocations.filter() {$0 != oldPos}
+            if(didTake) {
+                blackPieceLocations = blackPieceLocations.filter() {$0 != to}
+
+            }
+        }
+    }
+}
+
+//MARK: Debugging functions
+extension Board {
+    
     func printPositions() {
         print()
         var row = 0
@@ -216,7 +257,7 @@ class Board {
         }
         print()
     }
-
+    
     
     func printBoardWithPossibleMoves(playableSpaces:[[Int]]) {
         print()
@@ -270,48 +311,5 @@ class Board {
         print()
     }
     
-    // Removes a selected piece from its current spot to a new spot
-    func movePiece(piece:Piece, to:[Int]) {
-        var newPiece = piece
-        var oldPos = piece.currentPos
-        let row = to[0]
-        let col = to[1]
-        var didTake = false
-        
-        // this can only happen if a piece is being taken
-        if(board[row][col].isOccupied) {
-            didTake = true
-            let pieceToRemove = board[row][col].piece
-            if(piece.color == "Black") {
-                deadWhite.append(pieceToRemove)
-            } else {
-                deadBlack.append(pieceToRemove)
-            }
-        }
-        newPiece.currentPos = to
-        board[row][col].piece = newPiece
-        board[row][col].isOccupied = true
-        board[oldPos[0]][oldPos[1]].isOccupied = false
-        board[oldPos[0]][oldPos[1]].piece.color = ""
-        
-        if(piece.color == "Black") {
-            blackPieceLocations.append(to)
-            blackPieceLocations = blackPieceLocations.filter() {$0 != oldPos}
-            if(didTake) {
-                whitePieceLocations = whitePieceLocations.filter() {$0 != to}
-            }
-        } else {
-            whitePieceLocations.append(to)
-            whitePieceLocations = whitePieceLocations.filter() {$0 != oldPos}
-            if(didTake) {
-                blackPieceLocations = blackPieceLocations.filter() {$0 != to}
-
-            }
-        }
-    }
-    
-    
-    
 }
-
 

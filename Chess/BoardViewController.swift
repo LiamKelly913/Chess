@@ -10,17 +10,10 @@ import UIKit
 
 class BoardViewController: UIViewController {
     
-    
-    //TODO: Check if piece can be picked up (to prevent a piece pinned on the king from being picked up)
-        // Run getMoves for every piece on the board without the piece in question. If King is hit, don't allow interaction 
-        // with that piece
     //TODO: Add a 'lost pieces' view
     //TODO: Add move history
     //TODO: Add 'undo'
     
-    // checks for whether or not you can castle. These are changed after a move is
-    // played that removes castling from your playable list.
-
     var alreadyToggled:Bool = false
     var board:Board = Board()
     let moves:Moves = Moves()
@@ -162,12 +155,19 @@ class BoardViewController: UIViewController {
                 }
             }
         }
+        
+        if moves.enPessent {
+            
+        }
+        
+        if(selectedPiece.type == "Pawn") {
+            checkForEnPessent(piece: selectedPiece, board: board, moves: moves, to: endPos)
+        }
         // updates board state
         selectedPiece.button.frame.origin = CGPoint(x: CGFloat(300), y: CGFloat(300))
         board.movePiece(piece: selectedPiece, to: endPos)
         print("===================")
         board.printBoard()
-        board.printBoardWithColors()
         print("===================")
         UIView.animate(withDuration: 0.5) { 
             self.selectedButton.frame.origin = self.board.getXYForPos(pos: endPos)
@@ -190,6 +190,25 @@ class BoardViewController: UIViewController {
             blackTurn = true
         }
     }
+    
+    // Check if the move was an en pessent
+    func checkForEnPessent( piece:Board.Piece, board:Board, moves:Moves, to:[Int]) {
+        if (piece.color == "White") {
+            if piece.currentPos == [to[0] + 2, to[1]] {
+                moves.enPessent = true
+                moves.enPessentColor = "White"
+                moves.enPessentPos = [to[0] + 1, to[1]]
+            }
+        } else if piece.currentPos == [to[0] - 2, to[1]] {
+            moves.enPessent = true
+            moves.enPessentColor = "Black"
+            moves.enPessentPos = [to[0] - 1, to[1]]
+            
+        } else {
+            moves.enPessent = false
+        }
+    }
+    
     
     func endGame(color:String) {
         disableBlackButtons()
