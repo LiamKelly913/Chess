@@ -20,10 +20,6 @@ class ViewController: UIViewController {
     
     // checks for whether or not you can castle. These are changed after a move is
     // played that removes castling from your playable list.
-    var blackKingSideCastle:Bool = true
-    var blackQueenSideCastle:Bool = true
-    var whiteKingSideCastle:Bool = true
-    var whiteQueenSideCastle:Bool = true
 
     var alreadyToggled:Bool = false
     var board:Board = Board()
@@ -52,7 +48,7 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-
+    
     // create the dimensions and starting point for the board
     func createBoard() {
 
@@ -94,9 +90,9 @@ class ViewController: UIViewController {
             col = 0
             row+=1
         }
-        for button in blackButtons {
-            button.isUserInteractionEnabled = false
-        }
+        
+        // turn off black buttons for first move of the game
+        disableBlackButtons()
     }
     
     
@@ -157,6 +153,8 @@ class ViewController: UIViewController {
         disableButtonsForTurn()
         let endOrigin:CGPoint = sender.frame.origin
         let endPos:[Int] = board.getRCforXY(location: endOrigin)
+        let pieceTaken = board.getPieceByLocation(location: endOrigin)
+
         if board.getPieceByLocation(location: endOrigin).type != "" {
             for button in piecesOnBoard {
                 if button.frame.origin == endOrigin {
@@ -167,30 +165,63 @@ class ViewController: UIViewController {
         // updates board state
         selectedPiece.button.frame.origin = CGPoint(x: CGFloat(300), y: CGFloat(300))
         board.movePiece(piece: selectedPiece, to: endPos)
+        print("===================")
         board.printBoard()
+        board.printBoardWithColors()
+        print("===================")
         UIView.animate(withDuration: 0.5) { 
             self.selectedButton.frame.origin = self.board.getXYForPos(pos: endPos)
+        }
+        
+        if(pieceTaken.type == "King") {
+            endGame(color:pieceTaken.color)
         }
     }
 
     // disables interaction with buttons if it's not that color's turn
     func disableButtonsForTurn() {
         if blackTurn {
-            for button in blackButtons {
-                button.isUserInteractionEnabled = true
-            }
-            for button in whiteButtons {
-                button.isUserInteractionEnabled = false
-            }
+            enableBlackButtons()
+            disableWhiteButtons()
             blackTurn = false
         } else {
-            for button in blackButtons {
-                button.isUserInteractionEnabled = false
-            }
-            for button in whiteButtons {
-                button.isUserInteractionEnabled = true
-            }
+            disableBlackButtons()
+            enableWhiteButtons()
             blackTurn = true
+        }
+    }
+    
+    func endGame(color:String) {
+        disableBlackButtons()
+        disableWhiteButtons()
+        if(color == "Black") {
+            //white wins
+        } else {
+            //black wins
+        }
+    }
+    
+    func disableBlackButtons() {
+        for button in blackButtons {
+            button.isUserInteractionEnabled = false
+        }
+    }
+    
+    func disableWhiteButtons() {
+        for button in whiteButtons {
+            button.isUserInteractionEnabled = false
+        }
+    }
+    
+    func enableBlackButtons() {
+        for button in blackButtons {
+            button.isUserInteractionEnabled = true
+        }
+    }
+    
+    func enableWhiteButtons() {
+        for button in whiteButtons {
+            button.isUserInteractionEnabled = true
         }
     }
     
