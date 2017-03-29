@@ -6,6 +6,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -44,11 +45,35 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="0.35907472082708097" green="0.70054727157360408" blue="0.41387324603532033" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dXm-wz-uzF">
+                                <rect key="frame" x="117.5" y="309" width="140" height="48"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="30"/>
+                                <state key="normal" title="Play Again"/>
+                                <connections>
+                                    <action selector="resetWithSender:" destination="BYZ-38-t0r" eventType="touchUpInside" id="l55-RV-zHQ"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Mpo-Kj-J5u">
+                                <rect key="frame" x="16" y="20" width="39" height="30"/>
+                                <state key="normal" title="Reset">
+                                    <color key="titleColor" red="0.97565758941073755" green="1" blue="0.97574204921357377" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="resetWithSender:" destination="BYZ-38-t0r" eventType="touchUpInside" id="YVs-us-UW3"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="0.4299075129427441" green="0.39920111427238375" blue="0.38167578775478606" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="dXm-wz-uzF" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="0jP-Ck-Grl"/>
+                            <constraint firstItem="Mpo-Kj-J5u" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="M1l-ZU-rk7"/>
+                            <constraint firstAttribute="leadingMargin" secondItem="Mpo-Kj-J5u" secondAttribute="leading" id="Mpl-s7-HIv"/>
+                            <constraint firstItem="dXm-wz-uzF" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Zjr-PP-cJi"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="boardView" destination="ff2-lM-Yxk" id="aXX-pi-hYO"/>
+                        <outlet property="playAgain" destination="dXm-wz-uzF" id="HV8-Dw-PcS"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
