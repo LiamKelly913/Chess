@@ -37,6 +37,7 @@ class BoardViewController: UIViewController {
     var blackTurn:Bool = true
     
     @IBOutlet weak var boardView:UIImageView!
+    @IBOutlet weak var playAgain:UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,7 +53,7 @@ class BoardViewController: UIViewController {
     
     // create the dimensions and starting point for the board
     func createBoard() {
-
+        playAgain.isHidden = true
         //Set up dimensions and origin of board, add 'remove highlights' if board is tapped
         let sideLength = self.view.frame.width
         let startingPoint = (self.view.frame.height - sideLength)/2
@@ -212,6 +213,8 @@ class BoardViewController: UIViewController {
         if(pieceTaken.type == "King") {
             endGame(color:pieceTaken.color)
         }
+        
+        
     }
 
     // disables interaction with buttons if it's not that color's turn
@@ -249,6 +252,7 @@ class BoardViewController: UIViewController {
     func endGame(color:String) {
         disableBlackButtons()
         disableWhiteButtons()
+        playAgain.isHidden = false
         if(color == "Black") {
             //white wins
         } else {
@@ -279,6 +283,24 @@ class BoardViewController: UIViewController {
             button.isUserInteractionEnabled = true
         }
     }
+    
+    
+    @IBAction func reset(sender: UIButton) {
+        for button in piecesOnBoard {
+            button.removeFromSuperview()
+        }
+        board.board.removeAll()
+        board = Board()
+        
+        piecesOnBoard.removeAll()
+        blackButtons.removeAll()
+        whiteButtons.removeAll()
+        blackTurn = true
+        
+        board.boardSetup()
+        createBoard()
+    }
+    
     
 }
 
