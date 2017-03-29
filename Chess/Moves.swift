@@ -15,7 +15,13 @@ import Foundation
 class Moves {
     
     //TODO: Implement Castling
-    //TODO: Weird pawn capture thing
+    //TODO: En Pessent
+    // for weird pawn capture: When getting moves for a pawn that moves 2 spaces, save the first 
+    // space in front of it to a capture array, check during movesForPawn. 
+    // en pessent only lasts for one move.
+    var enPessent:Bool = false
+    var enPessentPos:[Int] = [Int]()
+    var enPessentColor:String = String()
     
     func movesForPiece(boardObject:Board, piece:Board.Piece, position:[Int]) -> [[Int]] {
         let whitePieces = boardObject.whitePieceLocations
@@ -25,6 +31,7 @@ class Moves {
         let col = position[1]
         
         var allPlayableSpaces:[[Int]] = [[Int]]()
+        
         
         /*
          * Any piece that can move a set amount each turn has the viable moves updated
@@ -95,6 +102,7 @@ class Moves {
             allPlayableSpaces.append([row-2,col])
         }
         allPlayableSpaces = checkForPawnCapture(boardObject: boardObject, position: [row,col], color: piece.color, playableSpaces: allPlayableSpaces)
+        
         return allPlayableSpaces
     }
     
@@ -106,7 +114,18 @@ class Moves {
         
         let board = boardObject.board
         
+        // Check if can capture en pessent
         if color == "Black" && row != 7 {
+            if(enPessent) {
+                if enPessentColor == "White" {
+                    if(enPessentPos == [row + 1, col + 1]) {
+                        newPlayableSpaces.append([row + 1, col + 1])
+                    } else if (enPessentPos == [row + 1, col - 1]) {
+                        newPlayableSpaces.append([row + 1,col - 1])
+                    }
+                }
+            }
+            
             // If there is a white piece at 1,1 or 1,-1 from the pawn, then add to playable spaces
             if(col != 7 && board[row + 1][col + 1].piece.color == "White") {
                 newPlayableSpaces.append([row+1,col+1])
@@ -115,6 +134,16 @@ class Moves {
                 newPlayableSpaces.append([row+1,col-1])
             }
         } else if row != 0 {
+            
+            if(enPessent) {
+                if enPessentColor == "Black" {
+                    if(enPessentPos == [row - 1, col + 1]) {
+                        newPlayableSpaces.append([row - 1, col + 1])
+                    } else if (enPessentPos == [row - 1, col - 1]) {
+                        newPlayableSpaces.append([row - 1,col - 1])
+                    }
+                }
+            }
             // If there is a black piece at -1,-1 or -1,1 from the pawn, then add to playable spaces
             if (col != 0 && board[row - 1][col - 1].piece.color == "Black") {
                 newPlayableSpaces.append([row-1,col-1])
@@ -126,7 +155,6 @@ class Moves {
         return newPlayableSpaces
     }
     
-    //TODO: Fix bug that messes with potential moves
     // delete all positions that land outside the board or on friendly pieces
     func cleanPlayableSpaces(blackPieceLocations:[[Int]], whitePieceLocations:[[Int]], currentPositions:[[Int]], color:String) -> [[Int]] {
         var newPositions = currentPositions

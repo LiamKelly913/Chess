@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  BoardViewController.swift
 //  Chess
 //
 //  Created by Liam Kelly on 3/6/17.
@@ -8,19 +8,12 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class BoardViewController: UIViewController {
     
-    
-    //TODO: Check if piece can be picked up (to prevent a piece pinned on the king from being picked up)
-        // Run getMoves for every piece on the board without the piece in question. If King is hit, don't allow interaction 
-        // with that piece
     //TODO: Add a 'lost pieces' view
     //TODO: Add move history
     //TODO: Add 'undo'
     
-    // checks for whether or not you can castle. These are changed after a move is
-    // played that removes castling from your playable list.
-
     var alreadyToggled:Bool = false
     var board:Board = Board()
     let moves:Moves = Moves()
@@ -32,6 +25,14 @@ class ViewController: UIViewController {
     
     var blackButtons:[UIButton] = [UIButton]()
     var whiteButtons:[UIButton] = [UIButton]()
+    
+    var xForLostBlack:CGFloat = CGFloat()
+    var yForLostBlack:CGFloat = CGFloat()
+    
+    var xForLostWhite:CGFloat = CGFloat()
+    var yForLostWhite:CGFloat = CGFloat()
+    
+    var deadPieceSize:CGFloat = CGFloat()
     
     var blackTurn:Bool = true
     
@@ -91,10 +92,23 @@ class ViewController: UIViewController {
             row+=1
         }
         
+        //setup coordinates for dead pieces
+        deadPieceSize = self.view.frame.width / 16
+        xForLostWhite = 0
+        yForLostWhite = boardView.frame.origin.y - deadPieceSize
+        
+        xForLostBlack = 0
+        yForLostBlack = boardView.frame.origin.y + boardView.frame.width
+        
         // turn off black buttons for first move of the game
         disableBlackButtons()
     }
     
+    func deadPieceRect() -> CGSize {
+        let side = self.view.frame.width / 16
+        let size = CGSize(width: side, height: side)
+        return size
+    }
     
     func getSquareForScreen(pos:[Int]) -> CGRect {
         let side = self.view.frame.width / 8
@@ -157,17 +171,39 @@ class ViewController: UIViewController {
 
         if board.getPieceByLocation(location: endOrigin).type != "" {
             for button in piecesOnBoard {
-                if button.frame.origin == endOrigin {
-                    button.removeFromSuperview()
+                if board.getPieceByLocation(location: endOrigin).color == "White" {
+                    if button.frame.origin == endOrigin {
+                        UIView.animate(withDuration: 0.5) {
+                            button.frame = CGRect(origin: CGPoint(x: self.xForLostWhite, y: self.yForLostWhite), size: self.deadPieceRect())
+                            button.isUserInteractionEnabled = false
+                        }
+                        xForLostWhite+=deadPieceSize
+                    }
+                } else {
+                    if button.frame.origin == endOrigin {
+                        UIView.animate(withDuration: 0.5) {
+                            button.frame = CGRect(origin: CGPoint(x:self.xForLostBlack, y: self.yForLostBlack), size: self.deadPieceRect())
+                            button.isUserInteractionEnabled = false
+                        }
+                        xForLostBlack+=deadPieceSize
+                    }
                 }
+                
             }
+        }
+        
+        if moves.enPessent {
+            
+        }
+        
+        if(selectedPiece.type == "Pawn") {
+            checkForEnPessent(piece: selectedPiece, board: board, moves: moves, to: endPos)
         }
         // updates board state
         selectedPiece.button.frame.origin = CGPoint(x: CGFloat(300), y: CGFloat(300))
         board.movePiece(piece: selectedPiece, to: endPos)
         print("===================")
         board.printBoard()
-        board.printBoardWithColors()
         print("===================")
         UIView.animate(withDuration: 0.5) { 
             self.selectedButton.frame.origin = self.board.getXYForPos(pos: endPos)
@@ -190,6 +226,25 @@ class ViewController: UIViewController {
             blackTurn = true
         }
     }
+    
+    // Check if the move was an en pessent
+    func checkForEnPessent( piece:Board.Piece, board:Board, moves:Moves, to:[Int]) {
+        if (piece.color == "White") {
+            if piece.currentPos == [to[0] + 2, to[1]] {
+                moves.enPessent = true
+                moves.enPessentColor = "White"
+                moves.enPessentPos = [to[0] + 1, to[1]]
+            }
+        } else if piece.currentPos == [to[0] - 2, to[1]] {
+            moves.enPessent = true
+            moves.enPessentColor = "Black"
+            moves.enPessentPos = [to[0] - 1, to[1]]
+            
+        } else {
+            moves.enPessent = false
+        }
+    }
+    
     
     func endGame(color:String) {
         disableBlackButtons()
