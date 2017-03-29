@@ -45,7 +45,7 @@
                                 <color key="backgroundColor" red="0.35907472082708097" green="0.70054727157360408" blue="0.41387324603532033" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </imageView>
                         </subviews>
-                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" red="0.4299075129427441" green="0.39920111427238375" blue="0.38167578775478606" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
                     <connections>
                         <outlet property="boardView" destination="ff2-lM-Yxk" id="aXX-pi-hYO"/>

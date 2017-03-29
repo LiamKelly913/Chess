@@ -26,6 +26,14 @@ class BoardViewController: UIViewController {
     var blackButtons:[UIButton] = [UIButton]()
     var whiteButtons:[UIButton] = [UIButton]()
     
+    var xForLostBlack:CGFloat = CGFloat()
+    var yForLostBlack:CGFloat = CGFloat()
+    
+    var xForLostWhite:CGFloat = CGFloat()
+    var yForLostWhite:CGFloat = CGFloat()
+    
+    var deadPieceSize:CGFloat = CGFloat()
+    
     var blackTurn:Bool = true
     
     @IBOutlet weak var boardView:UIImageView!
@@ -84,10 +92,23 @@ class BoardViewController: UIViewController {
             row+=1
         }
         
+        //setup coordinates for dead pieces
+        deadPieceSize = self.view.frame.width / 16
+        xForLostWhite = 0
+        yForLostWhite = boardView.frame.origin.y - deadPieceSize
+        
+        xForLostBlack = 0
+        yForLostBlack = boardView.frame.origin.y + boardView.frame.width
+        
         // turn off black buttons for first move of the game
         disableBlackButtons()
     }
     
+    func deadPieceRect() -> CGSize {
+        let side = self.view.frame.width / 16
+        let size = CGSize(width: side, height: side)
+        return size
+    }
     
     func getSquareForScreen(pos:[Int]) -> CGRect {
         let side = self.view.frame.width / 8
@@ -150,9 +171,24 @@ class BoardViewController: UIViewController {
 
         if board.getPieceByLocation(location: endOrigin).type != "" {
             for button in piecesOnBoard {
-                if button.frame.origin == endOrigin {
-                    button.removeFromSuperview()
+                if board.getPieceByLocation(location: endOrigin).color == "White" {
+                    if button.frame.origin == endOrigin {
+                        UIView.animate(withDuration: 0.5) {
+                            button.frame = CGRect(origin: CGPoint(x: self.xForLostWhite, y: self.yForLostWhite), size: self.deadPieceRect())
+                            button.isUserInteractionEnabled = false
+                        }
+                        xForLostWhite+=deadPieceSize
+                    }
+                } else {
+                    if button.frame.origin == endOrigin {
+                        UIView.animate(withDuration: 0.5) {
+                            button.frame = CGRect(origin: CGPoint(x:self.xForLostBlack, y: self.yForLostBlack), size: self.deadPieceRect())
+                            button.isUserInteractionEnabled = false
+                        }
+                        xForLostBlack+=deadPieceSize
+                    }
                 }
+                
             }
         }
         

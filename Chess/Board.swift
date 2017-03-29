@@ -217,6 +217,14 @@ class Board {
             }
         }
     }
+    
+    //TODO: Write en pessent funciton that takes in a move object to be called in movePiece()
+    func moveForEnPessent(moves:Moves) {
+        // If the moves object has a viable en pessent option that was taken, updated Moves object
+        if (moves.enPessent) {
+            
+        }
+    }
 }
 
 //MARK: Debugging functions
