@@ -15,10 +15,7 @@ import Foundation
 class Moves {
     
     //TODO: Implement Castling
-    //TODO: En Pessent
-    // for weird pawn capture: When getting moves for a pawn that moves 2 spaces, save the first 
-    // space in front of it to a capture array, check during movesForPawn. 
-    // en pessent only lasts for one move.
+    
     var enPessent:Bool = false
     var enPessentPos:[Int] = [Int]()
     var enPessentColor:String = String()

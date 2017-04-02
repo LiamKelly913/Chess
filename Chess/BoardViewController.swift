@@ -10,7 +10,6 @@ import UIKit
 
 class BoardViewController: UIViewController {
     
-    //TODO: Add a 'lost pieces' view
     //TODO: Add move history
     //TODO: Add 'undo'
     
@@ -164,6 +163,7 @@ class BoardViewController: UIViewController {
     
     // attached to the highlighted spaces, updates board state and animates piece moving
     func choseHighlightedSpace(sender:UIButton) {
+        var moveType:String = String()
         toggleOffOptions()
         disableButtonsForTurn()
         let endOrigin:CGPoint = sender.frame.origin
@@ -194,15 +194,37 @@ class BoardViewController: UIViewController {
         }
         
         if moves.enPessent {
-            
+            if moves.enPessentPos == endPos {
+                moveType = "En Pessent"
+                if selectedPiece.color == "Black" {
+                    // animate piece moving / disable button
+                    for button in piecesOnBoard {
+                        if button.frame.origin == board.getXYForPos(pos: [endPos[0]-1,endPos[1]]) {
+                            UIView.animate(withDuration: 0.5) {
+                                button.frame = CGRect(origin: CGPoint(x: self.xForLostWhite, y: self.yForLostWhite), size: self.deadPieceRect())
+                                button.isUserInteractionEnabled = false
+                            }
+                        }
+                    }
+                } else {
+                    for button in piecesOnBoard {
+                        if button.frame.origin == board.getXYForPos(pos: [endPos[0]+1,endPos[1]]) {
+                            UIView.animate(withDuration: 0.5) {
+                                button.frame = CGRect(origin: CGPoint(x: self.xForLostBlack, y: self.yForLostBlack), size: self.deadPieceRect())
+                                button.isUserInteractionEnabled = false
+                            }
+                        }
+                    }
+                }
+            }
         }
-        
+    
         if(selectedPiece.type == "Pawn") {
             checkForEnPessent(piece: selectedPiece, board: board, moves: moves, to: endPos)
         }
         // updates board state
         selectedPiece.button.frame.origin = CGPoint(x: CGFloat(300), y: CGFloat(300))
-        board.movePiece(piece: selectedPiece, to: endPos)
+        board.movePiece(piece: selectedPiece, to: endPos, specialCase: moveType)
         print("===================")
         board.printBoard()
         print("===================")
@@ -242,7 +264,6 @@ class BoardViewController: UIViewController {
             moves.enPessent = true
             moves.enPessentColor = "Black"
             moves.enPessentPos = [to[0] - 1, to[1]]
-            
         } else {
             moves.enPessent = false
         }
