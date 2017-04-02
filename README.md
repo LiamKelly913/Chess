@@ -1,3 +1,5 @@
 #Chess App
 
-Basic chess app. Will be creating UI to work with after images are created.
+Basic chess app to be played with 2 people.
+
+AI coming soon.
