@@ -37,7 +37,7 @@ class Board {
     var whitePieceLocations:[[Int]] = [[Int]]()
     var deadWhite:[Piece] = [Piece]()
     var deadBlack:[Piece] = [Piece]()
-
+    
     
     //MARK: Setup
     
@@ -178,53 +178,64 @@ class Board {
     
     
     // Removes a selected piece from its current spot to a new spot
-    func movePiece(piece:Piece, to:[Int]) {
+    func movePiece(piece:Piece, to:[Int], specialCase:String) {
         var newPiece = piece
         var oldPos = piece.currentPos
         let row = to[0]
         let col = to[1]
         var didTake = false
         
-        // this can only happen if a piece is being taken
-        if(board[row][col].isOccupied) {
-            didTake = true
-            let pieceToRemove = board[row][col].piece
-            if(piece.color == "Black") {
-                deadWhite.append(pieceToRemove)
-            } else {
-                deadBlack.append(pieceToRemove)
-            }
-        }
-        
+        // Push piece to new space, wipe old space clean
         newPiece.currentPos = to
         board[row][col].piece = newPiece
         board[row][col].isOccupied = true
         board[oldPos[0]][oldPos[1]].isOccupied = false
         board[oldPos[0]][oldPos[1]].piece.color = ""
         
-        if(piece.color == "Black") {
-            blackPieceLocations.append(to)
-            blackPieceLocations = blackPieceLocations.filter() {$0 != oldPos}
-            if(didTake) {
-                whitePieceLocations = whitePieceLocations.filter() {$0 != to}
+        switch specialCase {
+        case "En Pessent":
+            if(piece.color == "Black") {
+                board[row - 1][col].isOccupied = false
+                board[row - 1][col].piece.color = ""
+                board[row - 1][col].piece.type = ""
+            } else {
+                board[row + 1][col].isOccupied = false
+                board[row + 1][col].piece.color = ""
+                board[row + 1][col].piece.type = ""
             }
-        } else {
-            whitePieceLocations.append(to)
-            whitePieceLocations = whitePieceLocations.filter() {$0 != oldPos}
-            if(didTake) {
-                blackPieceLocations = blackPieceLocations.filter() {$0 != to}
 
+        
+        case "Castle":
+            print()
+
+        
+        default:
+            if(board[row][col].isOccupied) {
+                didTake = true
+                let pieceToRemove = board[row][col].piece
+                if(piece.color == "Black") {
+                    deadWhite.append(pieceToRemove)
+                } else {
+                    deadBlack.append(pieceToRemove)
+                }
+            }
+            if(piece.color == "Black") {
+                blackPieceLocations.append(to)
+                blackPieceLocations = blackPieceLocations.filter() {$0 != oldPos}
+                if(didTake) {
+                    whitePieceLocations = whitePieceLocations.filter() {$0 != to}
+                }
+            } else {
+                whitePieceLocations.append(to)
+                whitePieceLocations = whitePieceLocations.filter() {$0 != oldPos}
+                if(didTake) {
+                    blackPieceLocations = blackPieceLocations.filter() {$0 != to}
+                    
+                }
             }
         }
     }
-    
-    //TODO: Write en pessent funciton that takes in a move object to be called in movePiece()
-    func moveForEnPessent(moves:Moves) {
-        // If the moves object has a viable en pessent option that was taken, updated Moves object
-        if (moves.enPessent) {
-            
-        }
-    }
+
 }
 
 //MARK: Debugging functions
