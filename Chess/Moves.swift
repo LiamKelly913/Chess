@@ -26,6 +26,7 @@ class Moves {
     var whiteQueenCastle = true
     var didCastle = false
     
+    /// Returns an array of viable positions for any given piece and board state
     func movesForPiece(boardObject:Board, piece:Board.Piece, position:[Int]) -> [[Int]] {
         let whitePieces = boardObject.whitePieceLocations
         let blackPieces = boardObject.blackPieceLocations
@@ -84,7 +85,7 @@ class Moves {
         return allPlayableSpaces
     }
     
-    // Returns all playable positions for a pawn
+    /// Returns all playable positions for a pawn
     func movesForPawn(boardObject:Board, piece:Board.Piece, position:[Int], color:String, white:[[Int]], black:[[Int]]) -> [[Int]] {
         var allPlayableSpaces = [[Int]]()
         let row = position[0]
@@ -112,7 +113,7 @@ class Moves {
         return allPlayableSpaces
     }
     
-    // Check if the pawn chosen can take an opposing piece
+    /// Check if the pawn chosen can take an opposing piece
     func checkForPawnCapture(boardObject:Board, position:[Int], color:String, playableSpaces:[[Int]]) -> [[Int]] {
         var newPlayableSpaces = playableSpaces
         let row = position[0]
@@ -163,7 +164,7 @@ class Moves {
         return newPlayableSpaces
     }
     
-    // delete all positions that land outside the board or on friendly pieces
+    /// delete all positions that land outside the board or on friendly pieces
     func cleanPlayableSpaces(blackPieceLocations:[[Int]], whitePieceLocations:[[Int]], currentPositions:[[Int]], color:String) -> [[Int]] {
         var newPositions = currentPositions
         var index = 0
@@ -198,7 +199,7 @@ class Moves {
         return newPositions
     }
     
-    // Returns all possible moves in a specified direction from one point
+    /// Returns all possible moves in a specified direction from one point
     func straightLine(boardObject:Board, origin:[Int], direction:String, color:String) -> [[Int]] {
         var board = boardObject.board
         var rowLimit:Int = 0

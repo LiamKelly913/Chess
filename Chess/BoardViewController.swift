@@ -169,30 +169,8 @@ class BoardViewController: UIViewController {
         let endOrigin:CGPoint = sender.frame.origin
         let endPos:[Int] = board.getRCforXY(location: endOrigin)
         let pieceTaken = board.getPieceByLocation(location: endOrigin)
-
-        if board.getPieceByLocation(location: endOrigin).type != "" {
-            for button in piecesOnBoard {
-                if board.getPieceByLocation(location: endOrigin).color == "White" {
-                    if button.frame.origin == endOrigin {
-                        UIView.animate(withDuration: 0.5) {
-                            button.frame = CGRect(origin: CGPoint(x: self.xForLostWhite, y: self.yForLostWhite), size: self.deadPieceRect())
-                            button.isUserInteractionEnabled = false
-                        }
-                        xForLostWhite+=deadPieceSize
-                    }
-                } else {
-                    if button.frame.origin == endOrigin {
-                        UIView.animate(withDuration: 0.5) {
-                            button.frame = CGRect(origin: CGPoint(x:self.xForLostBlack, y: self.yForLostBlack), size: self.deadPieceRect())
-                            button.isUserInteractionEnabled = false
-                        }
-                        xForLostBlack+=deadPieceSize
-                    }
-                }
-                
-            }
-        }
         
+        // EN PASSANT
         if moves.enPassant {
             if moves.enPassantPos == endPos {
                 moveType = "En Passant"
@@ -218,22 +196,72 @@ class BoardViewController: UIViewController {
                 }
             }
         }
-    
+        
         if(selectedPiece.type == "Pawn") {
-            checkForEnPessent(piece: selectedPiece, board: board, moves: moves, to: endPos)
-        }
-        // updates board state
-        selectedPiece.button.frame.origin = CGPoint(x: CGFloat(300), y: CGFloat(300))
-        board.movePiece(piece: selectedPiece, to: endPos, specialCase: moveType)
-        print("===================")
-        board.printBoard()
-        print("===================")
-        UIView.animate(withDuration: 0.5) { 
-            self.selectedButton.frame.origin = self.board.getXYForPos(pos: endPos)
+            checkForEnPassant(piece: selectedPiece, board: board, moves: moves, to: endPos)
         }
         
-        if(pieceTaken.type == "King") {
-            endGame(color:pieceTaken.color)
+        //TODO: Finish implementing Castle
+        // CASTLING
+        if(selectedPiece.type == "Rook" || selectedPiece.type == "King") {
+            if (board.board[endPos[0]][endPos[1]].getColor() == selectedPiece.color) {
+                var rookEndPoint:CGFloat = CGFloat()
+                var kingEndPoint:CGFloat = CGFloat()
+                if (selectedPiece.currentPos[1] == 7) {
+                    rookEndPoint = sender.frame.origin.x - 2 * (self.view.frame.width / 8)
+                    kingEndPoint = sender.frame.origin.x + 2 * (self.view.frame.width / 8)
+                } else {
+                    rookEndPoint = sender.frame.origin.x + 3 * (self.view.frame.width / 8)
+                    kingEndPoint = sender.frame.origin.x - 2 * (self.view.frame.width / 8)
+                }
+            }
+                
+                for button in piecesOnBoard {
+                    if button.frame.origin == board.getXYForPos(pos: endPos) {
+                        UIView.animate(withDuration: 0.5) {
+                            button.frame.origin = self.selectedButton.frame.origin
+                        }
+                    }
+                }
+            moveType = "Castle"
+        }
+    
+        // NORMAL MOVE / EN PASSANT
+        if(moveType != "Castle") {
+            if board.getPieceByLocation(location: endOrigin).type != "" {
+                for button in piecesOnBoard {
+                    if board.getPieceByLocation(location: endOrigin).color == "White" {
+                        if button.frame.origin == endOrigin {
+                            UIView.animate(withDuration: 0.5) {
+                                button.frame = CGRect(origin: CGPoint(x: self.xForLostWhite, y: self.yForLostWhite), size: self.deadPieceRect())
+                                button.isUserInteractionEnabled = false
+                            }
+                            xForLostWhite+=deadPieceSize
+                        }
+                    } else {
+                        if button.frame.origin == endOrigin {
+                            UIView.animate(withDuration: 0.5) {
+                                button.frame = CGRect(origin: CGPoint(x:self.xForLostBlack, y: self.yForLostBlack), size: self.deadPieceRect())
+                                button.isUserInteractionEnabled = false
+                            }
+                            xForLostBlack+=deadPieceSize
+                        }
+                    }
+                
+                }
+            }
+            // updates board state
+            selectedPiece.button.frame.origin = CGPoint(x: CGFloat(300), y: CGFloat(300))
+            board.movePiece(piece: selectedPiece, to: endPos, specialCase: moveType)
+            print("===================")
+            board.printBoard()
+            print("===================")
+            if(pieceTaken.type == "King") {
+                endGame(color:pieceTaken.color)
+            }
+            UIView.animate(withDuration: 0.5) {
+                self.selectedButton.frame.origin = self.board.getXYForPos(pos: endPos)
+            }
         }
         
         
@@ -253,7 +281,7 @@ class BoardViewController: UIViewController {
     }
     
     // Check if the move was an en pessent
-    func checkForEnPessent( piece:Board.Piece, board:Board, moves:Moves, to:[Int]) {
+    func checkForEnPassant( piece:Board.Piece, board:Board, moves:Moves, to:[Int]) {
         if (piece.color == "White") {
             if piece.currentPos == [to[0] + 2, to[1]] {
                 moves.enPassant = true
