@@ -193,9 +193,9 @@ class BoardViewController: UIViewController {
             }
         }
         
-        if moves.enPessent {
-            if moves.enPessentPos == endPos {
-                moveType = "En Pessent"
+        if moves.enPassant {
+            if moves.enPassantPos == endPos {
+                moveType = "En Passant"
                 if selectedPiece.color == "Black" {
                     // animate piece moving / disable button
                     for button in piecesOnBoard {
@@ -256,16 +256,16 @@ class BoardViewController: UIViewController {
     func checkForEnPessent( piece:Board.Piece, board:Board, moves:Moves, to:[Int]) {
         if (piece.color == "White") {
             if piece.currentPos == [to[0] + 2, to[1]] {
-                moves.enPessent = true
-                moves.enPessentColor = "White"
-                moves.enPessentPos = [to[0] + 1, to[1]]
+                moves.enPassant = true
+                moves.enPassantColor = "White"
+                moves.enPassantPos = [to[0] + 1, to[1]]
             }
         } else if piece.currentPos == [to[0] - 2, to[1]] {
-            moves.enPessent = true
-            moves.enPessentColor = "Black"
-            moves.enPessentPos = [to[0] - 1, to[1]]
+            moves.enPassant = true
+            moves.enPassantColor = "Black"
+            moves.enPassantPos = [to[0] - 1, to[1]]
         } else {
-            moves.enPessent = false
+            moves.enPassant = false
         }
     }
     

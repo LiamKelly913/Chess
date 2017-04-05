@@ -16,9 +16,15 @@ class Moves {
     
     //TODO: Implement Castling
     
-    var enPessent:Bool = false
-    var enPessentPos:[Int] = [Int]()
-    var enPessentColor:String = String()
+    var enPassant:Bool = false
+    var enPassantPos:[Int] = [Int]()
+    var enPassantColor:String = String()
+    
+    var blackKingCastle:Bool = true
+    var blackQueenCastle = true
+    var whiteKingCastle = true
+    var whiteQueenCastle = true
+    var didCastle = false
     
     func movesForPiece(boardObject:Board, piece:Board.Piece, position:[Int]) -> [[Int]] {
         let whitePieces = boardObject.whitePieceLocations
@@ -49,6 +55,8 @@ class Moves {
             
         case "Rook":
             allPlayableSpaces = horizontalMoves(board: boardObject, position: [row,col], color: piece.color)
+            allPlayableSpaces.append(addCastle(boardObject: boardObject, position: position, piece: piece))
+
             
         case "Bishop":
             allPlayableSpaces = diagonalMoves(board: boardObject, position: [row,col], color: piece.color)
@@ -59,6 +67,7 @@ class Moves {
                 [row,-1 + col],/******************/[row,1 + col],
                 [1 + row,-1 + col], [1 + row,col], [1 + row,1 + col]
             ]
+            allPlayableSpaces.append(addCastle(boardObject: boardObject, position: position, piece: piece))
         
         case "Queen":
             allPlayableSpaces = queenMoves(board: boardObject, position: [row,col], color: piece.color)
@@ -111,13 +120,15 @@ class Moves {
         
         let board = boardObject.board
         
-        // Check if can capture en pessent
+        // Check if can capture en passant
         if color == "Black" && row != 7 {
-            if(enPessent) {
-                if enPessentColor == "White" {
-                    if(enPessentPos == [row + 1, col + 1]) {
+            if(enPassant
+                
+                ) {
+                if enPassantColor == "White" {
+                    if(enPassantPos == [row + 1, col + 1]) {
                         newPlayableSpaces.append([row + 1, col + 1])
-                    } else if (enPessentPos == [row + 1, col - 1]) {
+                    } else if (enPassantPos == [row + 1, col - 1]) {
                         newPlayableSpaces.append([row + 1,col - 1])
                     }
                 }
@@ -132,11 +143,11 @@ class Moves {
             }
         } else if row != 0 {
             
-            if(enPessent) {
-                if enPessentColor == "Black" {
-                    if(enPessentPos == [row - 1, col + 1]) {
+            if(enPassant) {
+                if enPassantColor == "Black" {
+                    if(enPassantPos == [row - 1, col + 1]) {
                         newPlayableSpaces.append([row - 1, col + 1])
-                    } else if (enPessentPos == [row - 1, col - 1]) {
+                    } else if (enPassantPos == [row - 1, col - 1]) {
                         newPlayableSpaces.append([row - 1,col - 1])
                     }
                 }
@@ -321,6 +332,25 @@ class Moves {
     func queenMoves(board:Board, position:[Int], color:String) -> [[Int]] {
         let queenMoves = horizontalMoves(board: board, position: position, color: color) + diagonalMoves(board: board, position: position, color: color)
         return queenMoves
+    }
+    
+    /// Adds a playable move to the Rook and King if they can castle
+    func addCastle(boardObject:Board, position:[Int], piece:Board.Piece) -> [Int] {
+        let board = boardObject.board
+        var castleLocation:[Int] = [Int]()
+        if piece.color == "Black" {
+            if (blackKingCastle) {
+                if(!board[0][5].isOccupied && !board[0][6].isOccupied) {
+                    if(piece.type == "King") {
+                        castleLocation = [0,7]
+                    }
+                    if(piece.type == "Rook") {
+                        castleLocation = [0,4]
+                    }
+                }
+            }
+        }
+        return castleLocation
     }
     
     // Create a new board to test against, remove the piece in question and
