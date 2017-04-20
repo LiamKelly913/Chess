@@ -102,7 +102,7 @@ class Board {
     }
     
     
-    // Attaches the coordinates for each space once the dimensions of the board are known
+    /// Attaches the coordinates for each space once the dimensions of the board are known
     func attachSpaceLocations(startingPoint:CGPoint, width:CGFloat) {
         let oneSpaceLength = width/8
         var currentPoint = startingPoint
@@ -122,6 +122,8 @@ class Board {
     }
     
     //MARK: Position functions
+    
+    /// Returns a piece for any given XY coordinate
     func getPieceByLocation(location:CGPoint) -> Piece {
         var piece:Piece!
         for spot in board {
@@ -135,6 +137,7 @@ class Board {
         return piece
     }
     
+    /// Returns board position (Row,Col) for its corresponding XY coordinate
     func getRCforXY(location:CGPoint) -> [Int] {
         var RC:[Int] = [Int]()
         var row = 0
@@ -153,6 +156,7 @@ class Board {
     }
     
     
+    /// Returns XY coordinates for any given board position
     func getXYForPos(pos:[Int]) -> CGPoint {
         var xy:CGPoint!
         var currRow:Int = 0
@@ -177,7 +181,8 @@ class Board {
     
     
     
-    // Removes a selected piece from its current spot to a new spot
+    /// Removes a selected piece from its current position to a new position
+    /// while taking any special moves into account (caslting, en passant)
     func movePiece(piece:Piece, to:[Int], specialCase:String) {
         var newPiece = piece
         var oldPos = piece.currentPos
@@ -193,7 +198,7 @@ class Board {
         board[oldPos[0]][oldPos[1]].piece.color = ""
         
         switch specialCase {
-        case "En Pessent":
+        case "En Passant":
             if(piece.color == "Black") {
                 board[row - 1][col].isOccupied = false
                 board[row - 1][col].piece.color = ""

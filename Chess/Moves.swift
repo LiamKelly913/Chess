@@ -16,10 +16,17 @@ class Moves {
     
     //TODO: Implement Castling
     
-    var enPessent:Bool = false
-    var enPessentPos:[Int] = [Int]()
-    var enPessentColor:String = String()
+    var enPassant:Bool = false
+    var enPassantPos:[Int] = [Int]()
+    var enPassantColor:String = String()
     
+    var blackKingCastle:Bool = true
+    var blackQueenCastle = true
+    var whiteKingCastle = true
+    var whiteQueenCastle = true
+    var didCastle = false
+    
+    /// Returns an array of viable positions for any given piece and board state
     func movesForPiece(boardObject:Board, piece:Board.Piece, position:[Int]) -> [[Int]] {
         let whitePieces = boardObject.whitePieceLocations
         let blackPieces = boardObject.blackPieceLocations
@@ -49,6 +56,8 @@ class Moves {
             
         case "Rook":
             allPlayableSpaces = horizontalMoves(board: boardObject, position: [row,col], color: piece.color)
+            allPlayableSpaces.append(addCastle(boardObject: boardObject, position: position, piece: piece))
+
             
         case "Bishop":
             allPlayableSpaces = diagonalMoves(board: boardObject, position: [row,col], color: piece.color)
@@ -59,6 +68,7 @@ class Moves {
                 [row,-1 + col],/******************/[row,1 + col],
                 [1 + row,-1 + col], [1 + row,col], [1 + row,1 + col]
             ]
+            allPlayableSpaces.append(addCastle(boardObject: boardObject, position: position, piece: piece))
         
         case "Queen":
             allPlayableSpaces = queenMoves(board: boardObject, position: [row,col], color: piece.color)
@@ -75,7 +85,7 @@ class Moves {
         return allPlayableSpaces
     }
     
-    // Returns all playable positions for a pawn
+    /// Returns all playable positions for a pawn
     func movesForPawn(boardObject:Board, piece:Board.Piece, position:[Int], color:String, white:[[Int]], black:[[Int]]) -> [[Int]] {
         var allPlayableSpaces = [[Int]]()
         let row = position[0]
@@ -103,7 +113,7 @@ class Moves {
         return allPlayableSpaces
     }
     
-    // Check if the pawn chosen can take an opposing piece
+    /// Check if the pawn chosen can take an opposing piece
     func checkForPawnCapture(boardObject:Board, position:[Int], color:String, playableSpaces:[[Int]]) -> [[Int]] {
         var newPlayableSpaces = playableSpaces
         let row = position[0]
@@ -111,13 +121,15 @@ class Moves {
         
         let board = boardObject.board
         
-        // Check if can capture en pessent
+        // Check if can capture en passant
         if color == "Black" && row != 7 {
-            if(enPessent) {
-                if enPessentColor == "White" {
-                    if(enPessentPos == [row + 1, col + 1]) {
+            if(enPassant
+                
+                ) {
+                if enPassantColor == "White" {
+                    if(enPassantPos == [row + 1, col + 1]) {
                         newPlayableSpaces.append([row + 1, col + 1])
-                    } else if (enPessentPos == [row + 1, col - 1]) {
+                    } else if (enPassantPos == [row + 1, col - 1]) {
                         newPlayableSpaces.append([row + 1,col - 1])
                     }
                 }
@@ -132,11 +144,11 @@ class Moves {
             }
         } else if row != 0 {
             
-            if(enPessent) {
-                if enPessentColor == "Black" {
-                    if(enPessentPos == [row - 1, col + 1]) {
+            if(enPassant) {
+                if enPassantColor == "Black" {
+                    if(enPassantPos == [row - 1, col + 1]) {
                         newPlayableSpaces.append([row - 1, col + 1])
-                    } else if (enPessentPos == [row - 1, col - 1]) {
+                    } else if (enPassantPos == [row - 1, col - 1]) {
                         newPlayableSpaces.append([row - 1,col - 1])
                     }
                 }
@@ -152,7 +164,7 @@ class Moves {
         return newPlayableSpaces
     }
     
-    // delete all positions that land outside the board or on friendly pieces
+    /// delete all positions that land outside the board or on friendly pieces
     func cleanPlayableSpaces(blackPieceLocations:[[Int]], whitePieceLocations:[[Int]], currentPositions:[[Int]], color:String) -> [[Int]] {
         var newPositions = currentPositions
         var index = 0
@@ -187,7 +199,7 @@ class Moves {
         return newPositions
     }
     
-    // Returns all possible moves in a specified direction from one point
+    /// Returns all possible moves in a specified direction from one point
     func straightLine(boardObject:Board, origin:[Int], direction:String, color:String) -> [[Int]] {
         var board = boardObject.board
         var rowLimit:Int = 0
@@ -321,6 +333,25 @@ class Moves {
     func queenMoves(board:Board, position:[Int], color:String) -> [[Int]] {
         let queenMoves = horizontalMoves(board: board, position: position, color: color) + diagonalMoves(board: board, position: position, color: color)
         return queenMoves
+    }
+    
+    /// Adds a playable move to the Rook and King if they can castle
+    func addCastle(boardObject:Board, position:[Int], piece:Board.Piece) -> [Int] {
+        let board = boardObject.board
+        var castleLocation:[Int] = [Int]()
+        if piece.color == "Black" {
+            if (blackKingCastle) {
+                if(!board[0][5].isOccupied && !board[0][6].isOccupied) {
+                    if(piece.type == "King") {
+                        castleLocation = [0,7]
+                    }
+                    if(piece.type == "Rook") {
+                        castleLocation = [0,4]
+                    }
+                }
+            }
+        }
+        return castleLocation
     }
     
     // Create a new board to test against, remove the piece in question and
