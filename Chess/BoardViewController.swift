@@ -40,7 +40,7 @@ class BoardViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        board.boardSetup()
+        board.refreshBoard()
         createBoard()
     }
 
@@ -255,6 +255,8 @@ class BoardViewController: UIViewController {
             board.movePiece(piece: selectedPiece, to: endPos, specialCase: moveType)
             print("===================")
             board.printBoard()
+            print()
+            board.printBoardWithColors()
             print("===================")
             if(pieceTaken.type == "King") {
                 endGame(color:pieceTaken.color)
@@ -346,7 +348,7 @@ class BoardViewController: UIViewController {
         whiteButtons.removeAll()
         blackTurn = true
         
-        board.boardSetup()
+        board.refreshBoard()
         createBoard()
     }
     

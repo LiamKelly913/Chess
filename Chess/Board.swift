@@ -11,6 +11,16 @@ import UIKit
 
 class Board {
     
+    
+    //TODO: Game object to hold board, game will hold all variables that baord doesn't need to explicitly express (pieces lost, moves made, etc...)
+    //TODO: Make AI
+    
+    //TODO: Create 'all possible moves' funciton
+    //TODO: Create 'generate random choice function'
+    //TODO: Create 'revert to previous stage' function (use stack, pop off most recent move, save removed moves until a new move is made)
+    
+    
+    
     struct Piece {
         var type:String = String()
         var color:String = String()
@@ -37,16 +47,21 @@ class Board {
     var whitePieceLocations:[[Int]] = [[Int]]()
     var deadWhite:[Piece] = [Piece]()
     var deadBlack:[Piece] = [Piece]()
-    
+    var moves:Moves = Moves()
     
     //MARK: Setup
     
     var board = Array(repeating: Array(repeating: Space(position: "", piece: Piece(), location: CGPoint(x: 0, y: 0), isOccupied: false), count: 8), count: 8)
-    let columns = ["a","b","c","d","e","f","g","h"]
+    let COLUMNS_LETTERS = ["a","b","c","d","e","f","g","h"]
+    let COLUMNS_NUMBERS = [1,2,3,4,5,6,7,8]
+    let BACK_LINE = ["Rook","Night","Bishop","Queen","King","Bishop","Night","Rook"]
     
-    let backLine = ["Rook","Night","Bishop","Queen","King","Bishop","Night","Rook"]
+    init() {
+        setupSpaces()
+        setupPieces()
+    }
     
-    func boardSetup() {
+    func refreshBoard() {
         setupSpaces()
         setupPieces()
     }
@@ -58,7 +73,7 @@ class Board {
         var calledRow = 8
         for _ in 1...8 {
             for _ in 1...8 {
-                board[row][col].position = columns[col] + String(calledRow)
+                board[row][col].position = COLUMNS[col] + String(calledRow)
                 col+=1
             }
             col = 0
@@ -67,11 +82,11 @@ class Board {
         }
     }
     
-    // Set up beginning state of board
+    /// Set up beginning state of board
     func setupPieces() {
         var col = 0
         for _ in 1...8 {
-            board[0][col].piece.type = backLine[col]
+            board[0][col].piece.type = BACK_LINE[col]
             blackPieceLocations.append([0,col])
             board[0][col].piece.currentPos = [0, col]
             board[0][col].isOccupied = true
@@ -84,7 +99,7 @@ class Board {
             board[1][col].piece.color = "Black"
             
             
-            board[7][col].piece.type = backLine[col]
+            board[7][col].piece.type = BACK_LINE[col]
             whitePieceLocations.append([7,col])
             board[7][col].piece.currentPos = [7, col]
             board[7][col].isOccupied = true
@@ -213,7 +228,7 @@ class Board {
         case "Castle":
             print()
 
-        
+
         default:
             if(board[row][col].isOccupied) {
                 didTake = true
@@ -240,8 +255,37 @@ class Board {
             }
         }
     }
-
 }
+
+
+//MARK: AI functions
+extension Board {
+    
+    /// Returns an array of arrays with arrays.
+    /// Initial array is the piece number, second array is the list of moves, third array is the specific move.
+    ///
+    ///       ex:
+    ///       [
+    ///        0[
+    ///             0[1,2], 1[3,2], 2[1,5]
+    ///         ],
+    ///        1[
+    ///             0[5,8], 1[1,6]
+    ///         ]
+    ///       ]
+    
+    func getAllBlackOptions() -> [[[Int]]] {
+        var movesForPieces:[[[Int]]] = [[[Int]]]()
+        var pieceIndex = 0
+        for loc in blackPieceLocations {
+            movesForPieces[pieceIndex] = moves.movesForPiece(boardObject: self, piece: getPieceByLocation(location: getXYForPos(pos: loc)), position: loc)
+            pieceIndex+=1
+        }
+        return movesForPieces
+    }
+}
+
+
 
 //MARK: Debugging functions
 extension Board {
@@ -291,7 +335,7 @@ extension Board {
         var col = 0
         for _ in 1 ... 8 {
             for _ in 1 ... 8 {
-                // if the current space matches any space in the playable moves array, print an O
+                // if the current space matches any space in the playable moves array, print 'O'
                 for space in playableSpaces {
                     if ([row,col] == space) {
                         print("O" + " ", terminator: "")
