@@ -1,5 +1,6 @@
-#Chess App
+# Chess App
+---
+Basic chess app to play with two people. 
+![](https://media.giphy.com/media/nDRiT2DKHwGYoxe9Ls/giphy.gif)
 
-Basic chess app to be played with 2 people.
-
-AI coming soon.
+Simple AI coming soon.
